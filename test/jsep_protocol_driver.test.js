@@ -16,17 +16,17 @@
 import { jest } from "@jest/globals";
 import "regenerator-runtime/runtime"; // Somehow needed for jest to be happy with ES6
 
-import * as Proto from "../../../proto/emulator_controller_pb";
-import * as Rtc from "../../../proto/rtc_service_pb";
+import * as Proto from "../src/proto/emulator_controller_pb";
+import * as Rtc from "../src/proto/rtc_service_pb";
 
-import JsepProtocol from "./jsep_protocol_driver.js";
+import JsepProtocol from "../src/components/emulator/net/jsep_protocol_driver.js";
 import {
   RtcService,
   EmulatorControllerService,
-} from "./emulator_web_client";
+} from "../src/components/emulator/net/emulator_web_client";
 import { Badge } from "@material-ui/core";
 
-jest.mock("./emulator_web_client");
+jest.mock("../src/components/emulator/net/emulator_web_client");
 
 beforeEach(() => {
   // Clear all instances and calls to constructor and all methods:
