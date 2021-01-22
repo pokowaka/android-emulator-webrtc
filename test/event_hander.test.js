@@ -101,4 +101,25 @@ describe("The event handler", () => {
     expect(jsep.send.mock.calls[0][0]).toBe("touch");
     expect(jsep.send).toHaveBeenCalledTimes(3);
   });
+
+  test("Normalizes touch pressure of 1.0 to EV_MAX", () => {
+    fireEvent(fakeScreen, fakeTouchEvent("touchstart", 10, 10, 1.0));
+
+    // We scaled 1 ===> (0x7fff/327677)
+    expect(jsep.send.mock.calls[0][1]["array"].flat(3)[3]).toBe(0x7fff);
+  });
+
+
+  test("Normalizes touch pressure of 0.0 to EV_MIN", () => {
+    fireEvent(fakeScreen, fakeTouchEvent("touchstart", 10, 10, 0.0));
+
+    // So the result we test against is a protobuf message. Protobuf
+    // is optimized to not ship the value 0 and will set it to "null".
+    expect(jsep.send.mock.calls[0][1]["array"].flat(3)[3]).toBe(null);
+  });
+
+  test("Normalizes touch pressure of 0.5 to an integer of half EV_MAX", () => {
+    fireEvent(fakeScreen, fakeTouchEvent("touchstart", 10, 10, 0.5));
+    expect(jsep.send.mock.calls[0][1]["array"].flat(3)[3]).toBe(16384);
+  });
 });
