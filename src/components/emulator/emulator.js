@@ -21,19 +21,29 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import EmulatorPngView from "./views/simple_png_view.js";
 import EmulatorWebrtcView from "./views/webrtc_view.js";
 import withMouseKeyHandler from "./views/event_handler";
-import JsepProtocol from "./net/jsep_protocol_driver.js";
-import WsJsepProtocol from "./net/ws_jsep_protocol_driver.js";
+import WsJsepProtocol from "./net/ws_jsep_protocol_driver";
+console.log("Imported WsJsepProtocol class:", WsJsepProtocol);
 import * as Proto from "../../proto/emulator_controller_pb";
-import {
-  RtcService,
-  EmulatorControllerService,
-} from "../../proto/emulator_web_client";
 
-const PngView = withMouseKeyHandler(EmulatorPngView);
 const RtcView = withMouseKeyHandler(EmulatorWebrtcView);
+
+const getUrls = (uri) => {
+  let restBase = uri;
+  if (!/^https?:\/\//i.test(uri)) {
+    restBase = "http://" + uri;
+  }
+  let wsUrl = restBase.replace(/^http/i, "ws");
+  restBase = restBase.replace(/\/$/, "");
+  wsUrl = wsUrl.replace(/\/$/, "");
+
+  return {
+    status: `${restBase}/api/v1/emulator/status`,
+    gps: `${restBase}/api/v1/emulator/gps`,
+    jsep: `${wsUrl}/api/v1/emulator/ws-jsep`,
+  };
+};
 
 /**
  * A React component that displays a remote android emulator.
@@ -86,9 +96,7 @@ const Emulator = forwardRef(
       },
       width,
       height,
-      view = "webrtc",
       gps,
-      poll = false,
       onError = (e) => {
         console.error(e);
       },
@@ -96,41 +104,44 @@ const Emulator = forwardRef(
     ref
   ) => {
     const [audio, setAudio] = useState(false);
-
-    const emulator = useRef(null);
-    const rtc = useRef(null);
     const jsep = useRef(null);
     const viewRef = useRef(null);
 
+    const urls = getUrls(uri);
+
     if (!jsep.current) {
-      if (uri.startsWith("ws://") || uri.startsWith("wss://")) {
-        jsep.current = new WsJsepProtocol(uri);
-      } else {
-        emulator.current = new EmulatorControllerService(uri, auth, onError);
-        rtc.current = new RtcService(uri, auth, onError);
-        jsep.current = new JsepProtocol(emulator.current, rtc.current, poll);
-      }
+      jsep.current = new WsJsepProtocol(urls.jsep);
+      console.log("Created JSEP:", jsep.current);
     }
 
     useEffect(() => {
-      if (view === "png") {
-        setAudio(false);
-      }
-    }, [view]);
-
-    useEffect(() => {
-      if (typeof gps === "undefined" || !emulator.current) {
+      if (typeof gps === "undefined") {
         return;
       }
 
-      const state = new Proto.GpsState();
-      state.setLatitude(gps.latitude);
-      state.setLongitude(gps.longitude);
-      state.setAltitude(gps.altitude);
-      state.setBearing(gps.heading);
-      state.setSpeed(gps.speed);
-      emulator.current.setGps(state);
-    }, [gps]);
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (auth && auth.authHeader) {
+        Object.assign(headers, auth.authHeader());
+      }
+
+      const body = JSON.stringify({
+        latitude: gps.latitude,
+        longitude: gps.longitude,
+        altitude: gps.altitude,
+        heading: gps.heading,
+        speed: gps.speed,
+      });
+
+      fetch(urls.gps, {
+        method: 'POST',
+        headers,
+        body,
+      }).catch(err => {
+        if (onError) onError(err);
+      });
+    }, [gps, uri, auth]);
 
     useEffect(() => {
       return () => {
@@ -154,38 +165,31 @@ const Emulator = forwardRef(
       onAudioStateChange(s);
     };
 
-    const components = {
-      webrtc: RtcView,
-      png: PngView,
-    };
-
-    const SpecificView = components[view] || RtcView;
-
     console.log(`render ${width}x${height}`);
     return (
-      <SpecificView
+      <RtcView
         ref={viewRef}
         width={width}
         height={height}
-        emulator={emulator.current}
+        statusUrl={urls.status}
         jsep={jsep.current}
         onStateChange={onStateChange}
-        poll={poll}
         muted={muted}
         volume={volume}
         onError={onError}
         onAudioStateChange={_onAudioStateChange}
+        auth={auth}
       />
     );
   }
 );
 
 Emulator.propTypes = {
-  /** gRPC Endpoint where we can reach the emulator. */
+  /** Endpoint where we can reach the emulator gateway (host:port or http(s)://host:port). */
   uri: PropTypes.string.isRequired,
   /** The authentication service to use, or null for no authentication. */
   auth: PropTypes.object,
-  /** True if the audio should be disabled. This is only relevant when using the webrtc engine. */
+  /** True if the audio should be disabled. */
   muted: PropTypes.bool,
   /** Volume between [0, 1] when audio is enabled. 0 is muted, 1.0 is 100% */
   volume: PropTypes.number,
@@ -197,13 +201,9 @@ Emulator.propTypes = {
   width: PropTypes.number,
   /** The height of the component */
   height: PropTypes.number,
-  /** The underlying view used to display the emulator, one of ["webrtc", "png"] */
-  view: PropTypes.oneOf(["webrtc", "png"]),
   /** A [GeolocationCoordinates](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates) like object indicating where the device is. */
   gps: PropTypes.object,
-  /** True if polling should be used, only set this to true if you are using the go webgrpc proxy. */
-  poll: PropTypes.bool,
-  /** Callback that will be invoked in case of gRPC errors. */
+  /** Callback that will be invoked in case of errors. */
   onError: PropTypes.func,
 };
 

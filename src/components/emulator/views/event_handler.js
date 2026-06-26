@@ -45,15 +45,17 @@ export default function withMouseKeyHandler(WrappedComponent) {
         },
       };
       this.handler = React.createRef();
-      const { emulator } = this.props;
-      this.status = new EmulatorStatus(emulator);
+      const { statusUrl, auth } = this.props;
+      this.status = new EmulatorStatus(statusUrl, auth);
     }
 
     static propTypes = {
-      /** The emulator object */
-      emulator: PropTypes.object,
+      /** The REST endpoint to retrieve status */
+      statusUrl: PropTypes.string,
       /** Jsep protocol driver, used to send mouse & touch events. */
       jsep: PropTypes.object.isRequired,
+      /** The authentication service to use */
+      auth: PropTypes.object,
     };
 
     componentDidMount() {
