@@ -6,20 +6,9 @@
     "build": "babel src -d dist",
     "test": "jest"
   },
-  "babel": {
-    "presets": [
-      "@babel/preset-env",
-      "@babel/preset-react"
-    ],
-    "plugins": [
-      "@babel/plugin-proposal-class-properties"
-    ]
-  },
+
   "jest": {
-    "verbose": true,
-    "transformIgnorePatterns": [
-      "/node_modules/@juggle/resize-observer/"
-    ]
+    "verbose": true
   },
   "dependencies": {
     "google-protobuf": "^3.21.2",
