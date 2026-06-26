@@ -25,6 +25,7 @@ import EmulatorPngView from "./views/simple_png_view.js";
 import EmulatorWebrtcView from "./views/webrtc_view.js";
 import withMouseKeyHandler from "./views/event_handler";
 import JsepProtocol from "./net/jsep_protocol_driver.js";
+import WsJsepProtocol from "./net/ws_jsep_protocol_driver.js";
 import * as Proto from "../../proto/emulator_controller_pb";
 import {
   RtcService,
@@ -101,10 +102,14 @@ const Emulator = forwardRef(
     const jsep = useRef(null);
     const viewRef = useRef(null);
 
-    if (!emulator.current) {
-      emulator.current = new EmulatorControllerService(uri, auth, onError);
-      rtc.current = new RtcService(uri, auth, onError);
-      jsep.current = new JsepProtocol(emulator.current, rtc.current, poll);
+    if (!jsep.current) {
+      if (uri.startsWith("ws://") || uri.startsWith("wss://")) {
+        jsep.current = new WsJsepProtocol(uri);
+      } else {
+        emulator.current = new EmulatorControllerService(uri, auth, onError);
+        rtc.current = new RtcService(uri, auth, onError);
+        jsep.current = new JsepProtocol(emulator.current, rtc.current, poll);
+      }
     }
 
     useEffect(() => {
@@ -114,7 +119,7 @@ const Emulator = forwardRef(
     }, [view]);
 
     useEffect(() => {
-      if (typeof gps === "undefined") {
+      if (typeof gps === "undefined" || !emulator.current) {
         return;
       }
 

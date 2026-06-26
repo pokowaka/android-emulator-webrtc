@@ -51,7 +51,7 @@ export default function withMouseKeyHandler(WrappedComponent) {
 
     static propTypes = {
       /** The emulator object */
-      emulator: PropTypes.object.isRequired,
+      emulator: PropTypes.object,
       /** Jsep protocol driver, used to send mouse & touch events. */
       jsep: PropTypes.object.isRequired,
     };

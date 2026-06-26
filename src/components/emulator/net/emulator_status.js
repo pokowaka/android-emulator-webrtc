@@ -37,8 +37,10 @@ class EmulatorStatus {
   constructor(uriOrEmulator, auth) {
     if (uriOrEmulator instanceof EmulatorControllerService) {
       this.emulator = uriOrEmulator;
-    } else {
+    } else if (uriOrEmulator) {
       this.emulator = new EmulatorControllerService(uriOrEmulator, auth);
+    } else {
+      this.emulator = null;
     }
     this.status = null;
   }
@@ -60,6 +62,9 @@ class EmulatorStatus {
    * @memberof EmulatorStatus
    */
   updateStatus = (fnNotify, cache) => {
+    if (!this.emulator) {
+      return;
+    }
     const request = new Empty();
     if (cache && this.status) {
       fnNotify(this.status);

@@ -30,15 +30,23 @@ import {
   EmulatorControllerService,
 } from "../src/proto/emulator_web_client";
 import JsepProtocol from "../src/components/emulator/net/jsep_protocol_driver";
+import WsJsepProtocol from "../src/components/emulator/net/ws_jsep_protocol_driver";
 
 jest.mock("../src/proto/emulator_web_client");
 jest.mock("../src/components/emulator/net/jsep_protocol_driver");
+jest.mock("../src/components/emulator/net/ws_jsep_protocol_driver");
 
 const mockDisconnect = jest.fn();
 const mockStartStream = jest.fn();
 const mockOn = jest.fn();
 const mockSend = jest.fn();
 const mockCleanup = jest.fn();
+
+const mockWsDisconnect = jest.fn();
+const mockWsStartStream = jest.fn();
+const mockWsOn = jest.fn();
+const mockWsSend = jest.fn();
+const mockWsCleanup = jest.fn();
 
 JsepProtocol.mockImplementation(() => {
   return {
@@ -49,6 +57,17 @@ JsepProtocol.mockImplementation(() => {
     cleanup: mockCleanup,
   };
 });
+
+WsJsepProtocol.mockImplementation(() => {
+  return {
+    disconnect: mockWsDisconnect,
+    startStream: mockWsStartStream,
+    on: mockWsOn,
+    send: mockWsSend,
+    cleanup: mockWsCleanup,
+  };
+});
+
 
 
 // See https://github.com/testing-library/react-testing-library/issues/470
@@ -80,6 +99,12 @@ describe("The emulator", () => {
     mockOn.mockClear();
     mockSend.mockClear();
     mockCleanup.mockClear();
+    mockWsDisconnect.mockClear();
+    mockWsStartStream.mockClear();
+    mockWsOn.mockClear();
+    mockWsSend.mockClear();
+    mockWsCleanup.mockClear();
+    WsJsepProtocol.mockClear();
   });
 
 
@@ -200,5 +225,17 @@ describe("The emulator", () => {
     );
     unmount();
     expect(mockCleanup).toHaveBeenCalled();
+  });
+
+  test("Uses WsJsepProtocol when uri starts with ws://", () => {
+    render(<Emulator uri="ws://localhost:8080" width={300} height={300} />);
+    expect(WsJsepProtocol).toHaveBeenCalledWith("ws://localhost:8080");
+    expect(EmulatorControllerService).not.toHaveBeenCalled();
+    expect(RtcService).not.toHaveBeenCalled();
+  });
+
+  test("Uses WsJsepProtocol when uri starts with wss://", () => {
+    render(<Emulator uri="wss://localhost:8080" width={300} height={300} />);
+    expect(WsJsepProtocol).toHaveBeenCalledWith("wss://localhost:8080");
   });
 });
