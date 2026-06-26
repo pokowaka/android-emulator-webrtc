@@ -10,6 +10,13 @@ export default defineConfig({
     include: /.*\.[jt]sx?$/,
     exclude: [],
   },
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        '.js': 'jsx',
+      },
+    },
+  },
   build: {
     commonjsOptions: {
       include: [/node_modules/, /src\/proto/],
