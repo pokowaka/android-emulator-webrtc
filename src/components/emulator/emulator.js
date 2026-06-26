@@ -25,7 +25,7 @@ import EmulatorWebrtcView from "./views/webrtc_view.js";
 import withMouseKeyHandler from "./views/event_handler";
 import WsJsepProtocol from "./net/ws_jsep_protocol_driver";
 console.log("Imported WsJsepProtocol class:", WsJsepProtocol);
-import * as Proto from "../../proto/emulator_controller_pb";
+import Proto from "../../proto/emulator_controller_pb";
 
 const RtcView = withMouseKeyHandler(EmulatorWebrtcView);
 

@@ -15,7 +15,7 @@
  */
 import PropTypes from "prop-types";
 import React from "react";
-import * as Proto from "../../../proto/emulator_controller_pb";
+import Proto from "../../../proto/emulator_controller_pb";
 import EmulatorStatus from "../net/emulator_status";
 
 /**
