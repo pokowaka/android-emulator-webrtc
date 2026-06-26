@@ -29,8 +29,27 @@ import {
   RtcService,
   EmulatorControllerService,
 } from "../src/proto/emulator_web_client";
+import JsepProtocol from "../src/components/emulator/net/jsep_protocol_driver";
 
 jest.mock("../src/proto/emulator_web_client");
+jest.mock("../src/components/emulator/net/jsep_protocol_driver");
+
+const mockDisconnect = jest.fn();
+const mockStartStream = jest.fn();
+const mockOn = jest.fn();
+const mockSend = jest.fn();
+const mockCleanup = jest.fn();
+
+JsepProtocol.mockImplementation(() => {
+  return {
+    disconnect: mockDisconnect,
+    startStream: mockStartStream,
+    on: mockOn,
+    send: mockSend,
+    cleanup: mockCleanup,
+  };
+});
+
 
 // See https://github.com/testing-library/react-testing-library/issues/470
 // As well as https://github.com/facebook/react/issues/10389
@@ -56,7 +75,13 @@ describe("The emulator", () => {
     // Clear all instances and calls to constructor and all methods:
     RtcService.mockClear();
     EmulatorControllerService.mockClear();
+    mockDisconnect.mockClear();
+    mockStartStream.mockClear();
+    mockOn.mockClear();
+    mockSend.mockClear();
+    mockCleanup.mockClear();
   });
+
 
   test("Creates gRPC services", async () => {
     render(
@@ -109,7 +134,7 @@ describe("The emulator", () => {
 
   test("The png view requests images", async () => {
     let pngCall = false
-    EmulatorControllerService.mockImplementation(() => {
+    EmulatorControllerService.mockImplementationOnce(() => {
       return {
         streamScreenshot: jest.fn((request) => {
             pngCall = true
@@ -121,5 +146,59 @@ describe("The emulator", () => {
 
     render(<Emulator uri="/test" width={300} height={300} view="png" />);
     expect(pngCall).toBeTruthy()
+  });
+
+  test("Exposes sendKey via ref", () => {
+    const ref = React.createRef();
+    render(<Emulator uri="/test" width={300} height={300} ref={ref} />);
+    expect(ref.current).toBeDefined();
+    expect(ref.current.sendKey).toBeDefined();
+
+    ref.current.sendKey("Enter");
+    expect(mockSend).toHaveBeenCalledWith("keyboard", expect.any(Proto.KeyboardEvent));
+    const callArg = mockSend.mock.calls[0][1];
+    expect(callArg.getKey()).toBe("Enter");
+    expect(callArg.getEventtype()).toBe(Proto.KeyboardEvent.KeyEventType.KEYPRESS);
+  });
+
+  test("Sends a gps location to the emulator on update", () => {
+    const { rerender } = render(
+      <Emulator
+        uri="/test"
+        width={300}
+        height={300}
+        gps={{ latitude: 47.6062, longitude: 122.3321 }}
+      />
+    );
+
+    const setGps = EmulatorControllerService.mock.instances[0].setGps;
+    expect(setGps).toHaveBeenCalledTimes(1);
+
+    // Update GPS
+    rerender(
+      <Emulator
+        uri="/test"
+        width={300}
+        height={300}
+        gps={{ latitude: 48.0, longitude: 122.0 }}
+      />
+    );
+    expect(setGps).toHaveBeenCalledTimes(2);
+
+    const location = new Proto.GpsState();
+    location.setLatitude(48.0);
+    location.setLongitude(122.0);
+    location.setAltitude(undefined);
+    location.setBearing(undefined);
+    location.setSpeed(undefined);
+    expect(setGps).toHaveBeenLastCalledWith(location);
+  });
+
+  test("Cleans up JsepProtocol on unmount", () => {
+    const { unmount } = render(
+      <Emulator uri="/test" width={300} height={300} />
+    );
+    unmount();
+    expect(mockCleanup).toHaveBeenCalled();
   });
 });
