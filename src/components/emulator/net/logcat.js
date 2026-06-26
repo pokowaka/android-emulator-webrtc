@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 import { EventEmitter } from "events";
-import "../../../proto/emulator_controller_pb";
-import { EmulatorControllerService } from "../../../proto/emulator_web_client";
 
 /**
  * Observe the logcat stream from the emulator.
  *
- * Streaming is done by either polling the emulator endpoint or making a streaming call.
+ * Streaming is done by polling the emulator REST endpoint.
  *
  * It will send out the following events:
  *
@@ -37,18 +35,13 @@ class Logcat {
    * - `unauthorized()` a function that gets called when a 401 was received.
    *
    * @constructor
-   * @param {object} uriOrEmulator
-   * @param {object} auth
+   * @param {string} logcatUrl Full REST URL to the logcat endpoint.
+   * @param {object} auth Authentication helper.
    */
-  constructor(uriOrEmulator, auth) {
-    if (uriOrEmulator instanceof EmulatorControllerService) {
-      this.emulator = uriOrEmulator;
-    } else {
-      this.emulator = new EmulatorControllerService(uriOrEmulator, auth);
-    }
+  constructor(logcatUrl, auth) {
+    this.logcatUrl = logcatUrl;
+    this.auth = auth;
     this.offset = 0;
-    this.lastline = "";
-    this.stream = null;
     this.events = new EventEmitter();
     this.refreshRate = 1000;
     this.timerID = null;
@@ -82,9 +75,6 @@ class Logcat {
    * @memberof Logcat
    */
   stop = () => {
-    if (this.stream) {
-      this.stream.cancel();
-    }
     if (this.timerID) {
       clearInterval(this.timerID);
       this.timerID = null;
@@ -94,60 +84,55 @@ class Logcat {
 
   pollStream = () => {
     const self = this;
-    /* eslint-disable */
-    const request = new proto.android.emulation.control.LogMessage();
-    request.setStart(this.offset);
-    this.emulator.getLogcat(request, {}, (err, response) => {
-      if (err) {
-        this.stop();
-      }
-      if (response) {
-        const nextOffset = response.getNext();
-        if (nextOffset > self.offset) {
-          self.offset = response.getNext();
-          self.events.emit("data", response.getContents());
-        }
-      }
-    });
-  };
+    const url = new URL(this.logcatUrl);
+    url.searchParams.append("start", this.offset);
 
-  // Uses streaming, this really locks up the ui, so best not to use for now.
-  stream = () => {
-    const self = this;
-    /* eslint-disable */
-    const request = new proto.android.emulation.control.LogMessage();
-    request.setStart(this.offset);
-    this.stream = this.emulator.streamLogcat(request);
-    this.stream.on("data", (response) => {
-      self.offset = response.getNext();
-      const contents = response.getContents();
-      self.events.emit("data", contents);
-    });
-    this.stream.on("error", (error) => {
-      if ((error.code = 1)) {
-        // Ignore we got cancelled.
-      }
-    });
+    const headers = {
+      "Accept": "application/json",
+    };
+    if (this.auth && this.auth.authHeader) {
+      Object.assign(headers, this.auth.authHeader());
+    }
+
+    fetch(url.toString(), { headers })
+      .then((res) => {
+        if (res.status === 401 && this.auth && this.auth.unauthorized) {
+          this.auth.unauthorized();
+        }
+        if (!res.ok) {
+          throw new Error("HTTP error " + res.status);
+        }
+        return res.json();
+      })
+      .then((response) => {
+        const nextOffset = response.next;
+        if (nextOffset > self.offset) {
+          self.offset = nextOffset;
+          self.events.emit("data", response.contents);
+        }
+      })
+      .catch((err) => {
+        console.error("Logcat error:", err);
+        this.stop();
+      });
   };
 
   /**
    * Requests the logcat stream, invoking the callback when a log line arrives.
    *
-   * *Note:* Streaming can cause serious UI delays, so best not to use it.
-   *
    * @param  {Callback} fnNotify when a new log line arrives.
-   * @param  {number} refreshRate polling interval, or 0 if you wish to use streaming.
+   * @param  {number} refreshRate polling interval. Must be > 0.
    * @memberof Logcat
    */
   start = (fnNotify, refreshRate = 1000) => {
     if (fnNotify) this.on("data", fnNotify);
 
     this.refreshRate = refreshRate;
-    if (this.refreshRate > 0) {
-      this.timerID = setInterval(() => this.pollStream(), this.refreshRate);
-    } else {
-      this.stream();
+    if (this.refreshRate <= 0) {
+      console.warn("Streaming logcat is no longer supported. Falling back to 1000ms polling.");
+      this.refreshRate = 1000;
     }
+    this.timerID = setInterval(() => this.pollStream(), this.refreshRate);
     this.events.emit("start");
   };
 }

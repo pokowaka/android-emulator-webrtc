@@ -1,8 +1,9 @@
 # android-emulator-webrtc
 
 This contains a set of React components that can be used to interact with the android emulator from the browser. It is
-intended to be used with an [envoy proxy](https://blog.envoyproxy.io/envoy-and-grpc-web-a-fresh-new-alternative-to-rest-6504ce7eb880)
-that is connected to a running emulator.
+designed to interface with an Emulator Gateway using REST and WebSockets (removing gRPC-web and Envoy proxy requirements).
+
+See the [Server Protocol Specification](docs/protocol.md) for details on how to implement the gateway.
 
 See the [android container](https://github.com/google/android-emulator-container-scripts) scripts for an example on how to run
 an emulator that is accessible via the web.
@@ -68,9 +69,9 @@ class EmulatorScreen extends React.Component {
 
 A React component that displays a remote android emulator.
 
-The emulator will mount a png or webrtc view component to display the current state
-of the emulator. It will translate mouse events on this component and send them
-to the actual emulator.
+The emulator will mount a webrtc view component to display the current state
+of the emulator. It will translate mouse and touch events on this component and send them
+to the actual emulator over WebRTC Data Channels.
 
 #### Authentication Service
 
@@ -78,12 +79,6 @@ The authentication service should implement the following methods:
 
 - `authHeader()` which must return a set of headers that should be send along with a request.
 - `unauthorized()` a function that gets called when a 401 was received.
-
-#### Type of view
-
-You usually want this to be webrtc as this will make use of the efficient
-webrtc implementation. The png view will request screenshots, which are
-very slow, and require the envoy proxy. You should not use this for remote emulators.
 
 #### Pressing hardware buttons
 
@@ -101,14 +96,12 @@ You can use this to send physical hardwar events to the emulator for example:
 | ---------------------- | :---------------------: | :-----------------------------------------------: | :----------------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | **auth**               |        `Object`         |                      `null`                       |        :x:         | The authentication service to use, or null for no authentication.                                                                               |
 | **height**             |        `Number`         |                                                   |        :x:         | The height of the component                                                                                                                     |
-| **muted**              |        `Boolean`        |                      `true`                       |        :x:         | True if the audio should be disabled. This is only relevant when using the webrtc engine.                                                       |
+| **muted**              |        `Boolean`        |                      `true`                       |        :x:         | True if the audio should be disabled.                                                                                                           |
 | **onAudioStateChange** |       `Function`        | `(s) => { console.log("emulator audio: " + s); }` |        :x:         | Called when the audio becomes (un)available. True if audio is available, false otherwise.                                                       |
-| **onError**            |       `Function`        |          `(e) => { console.error(e); }`           |        :x:         | Callback that will be invoked in case of gRPC errors.                                                                                           |
+| **onError**            |       `Function`        |          `(e) => { console.error(e); }`           |        :x:         | Callback that will be invoked in case of errors.                                                                                                |
 | **onStateChange**      |       `Function`        | `(s) => { console.log("emulator state: " + s); }` |        :x:         | Called upon state change, one of ["connecting", "connected", "disconnected"]                                                                    |
 | **gps**                |                         |                                                   |        :x:         | A [GeolocationCoordinates](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates) like object indicating where the device is. |
-| **poll**               |        `Boolean`        |                      `false`                      |        :x:         | True if polling should be used, only set this to true if you are using the go webgrpc proxy.                                                    |
-| **uri**                |        `String`         |                                                   | :white_check_mark: | gRPC Endpoint where we can reach the emulator.                                                                                                  |
-| **view**               | `Enum("webrtc", "png")` |                    `"webrtc"`                     |        :x:         | The underlying view used to display the emulator, one of ["webrtc", "png"]                                                                      |
+| **uri**                |        `String`         |                                                   | :white_check_mark: | Endpoint where we can reach the emulator gateway (host:port or http(s)://host:port).                                                            |
 | **volume**             |        `Number`         |                       `1.0`                       |        :x:         | Volume between [0, 1] when audio is enabled. 0 is muted, 1.0 is 100%                                                                            |
 | **width**              |        `Number`         |                                                   |        :x:         | The width of the component                                                                                                                      |
 
@@ -139,10 +132,10 @@ on how to change the audio volume.
 Gets the status of the emulator, parsing the hardware config into something
 easy to digest.
 
-| Param         | Type                                          | Description           |
-| ------------- | --------------------------------------------- | --------------------- |
-| uriOrEmulator | <code>string/EmulatorControllerService</code> | uri to gRPC endpoint. |
-| auth          | <code>object</code>                           | authorization class.  |
+| Param     | Type                | Description                       |
+| --------- | ------------------- | --------------------------------- |
+| statusUrl | <code>string</code> | REST endpoint to retrieve status. |
+| auth      | <code>object</code> | authorization class.              |
 
 <a name="EmulatorStatus.getStatus"></a>
 
@@ -170,7 +163,7 @@ Retrieves the current status from the emulator.
 
 Observe the logcat stream from the emulator.
 
-Streaming is done by either polling the emulator endpoint or making a streaming call.
+Streaming is done by polling the emulator REST endpoint.
 
 It will send out the following events:
 
@@ -189,7 +182,7 @@ It will send out the following events:
 
 <a name="new_Logcat_new"></a>
 
-### new Logcat(uriOrEmulator, auth)
+### new Logcat(logcatUrl, auth)
 
 Creates a logcat stream.
 
@@ -198,10 +191,10 @@ The authentication service should implement the following methods:
 - `authHeader()` which must return a set of headers that should be send along with a request.
 - `unauthorized()` a function that gets called when a 401 was received.
 
-| Param         | Type                |
-| ------------- | ------------------- |
-| uriOrEmulator | <code>object</code> |
-| auth          | <code>object</code> |
+| Param     | Type                | Description |
+| --------- | ------------------- | ----------- |
+| logcatUrl | <code>string</code> | REST endpoint to retrieve logcat. |
+| auth      | <code>object</code> | authorization class. |
 
 <a name="Logcat.on"></a>
 
@@ -242,11 +235,11 @@ Cancel the currently active logcat stream.
 
 Requests the logcat stream, invoking the callback when a log line arrives.
 
-_Note:_ Streaming can cause serious UI delays, so best not to use it.
+_Note:_ Streaming is no longer supported, this will always use polling.
 
 **Kind**: static property of [<code>Logcat</code>](#Logcat)
 
-| Param       | Type                  | Description                                          |
-| ----------- | --------------------- | ---------------------------------------------------- |
-| fnNotify    | <code>Callback</code> | when a new log line arrives.                         |
-| refreshRate | <code>number</code>   | polling interval, or 0 if you wish to use streaming. |
+| Param       | Type                  | Description                  |
+| ----------- | --------------------- | ---------------------------- |
+| fnNotify    | <code>Callback</code> | when a new log line arrives. |
+| refreshRate | <code>number</code>   | polling interval.            |
