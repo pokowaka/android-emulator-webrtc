@@ -174,7 +174,7 @@ It will send out the following events:
 **Kind**: global class
 
 - [Logcat](#Logcat)
-  - [new Logcat(uriOrEmulator, auth)](#new_Logcat_new)
+  - [new Logcat(logcatUrl, auth)](#new_Logcat_new)
   - [.on](#Logcat.on)
   - [.off](#Logcat.off)
   - [.stop](#Logcat.stop)
