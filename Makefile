@@ -30,12 +30,13 @@ PROTOSRCDIR   := $(CURRENT_DIR)/proto
 PROTO_SRC     := $(PROTOSRCDIR)/emulator_controller.proto
 PROTO_OBJS    := $(PROTODIR)/emulator_controller_pb.js
 
-.PHONY: clean build develop deps system-check protoc
+.PHONY: clean build deps system-check protoc
 
 all: check
 
 clean:
 	rm -rf $(PROTODIR)/*pb.js
+	rm -rf dist
 
 $(PROTODIR):
 	@mkdir -p $(PROTODIR)
