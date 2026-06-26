@@ -80,30 +80,20 @@ The authentication service should implement the following methods:
 - `authHeader()` which must return a set of headers that should be send along with a request.
 - `unauthorized()` a function that gets called when a 401 was received.
 
+Note that chrome will not autoplay the video if it is not muted and no interaction
+with the page has taken place. See https://developers.google.com/web/updates/2017/09/autoplay-policy-changes.
+
 #### Pressing hardware buttons
 
-This component has a method `sendKey` to sends a key to the emulator.
-You can use this to send physical hardwar events to the emulator for example:
+This component has a method `sendKey` that sends a key to the emulator.
+You can use this to send physical button events to the emulator for example:
 
-"AudioVolumeDown" - Decreases the audio volume.
-"AudioVolumeUp" - Increases the audio volume.
-"Power" - The Power button or key, turn off the device.
-"AppSwitch" - Should bring up the application switcher dialog.
-"GoHome" - Go to the home screen.
-"GoBack" - Open the previous screen you were looking at.
-
-| prop                   |          type           |                      default                      |      required      | description                                                                                                                                     |
-| ---------------------- | :---------------------: | :-----------------------------------------------: | :----------------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **auth**               |        `Object`         |                      `null`                       |        :x:         | The authentication service to use, or null for no authentication.                                                                               |
-| **height**             |        `Number`         |                                                   |        :x:         | The height of the component                                                                                                                     |
-| **muted**              |        `Boolean`        |                      `true`                       |        :x:         | True if the audio should be disabled.                                                                                                           |
-| **onAudioStateChange** |       `Function`        | `(s) => { console.log("emulator audio: " + s); }` |        :x:         | Called when the audio becomes (un)available. True if audio is available, false otherwise.                                                       |
-| **onError**            |       `Function`        |          `(e) => { console.error(e); }`           |        :x:         | Callback that will be invoked in case of errors.                                                                                                |
-| **onStateChange**      |       `Function`        | `(s) => { console.log("emulator state: " + s); }` |        :x:         | Called upon state change, one of ["connecting", "connected", "disconnected"]                                                                    |
-| **gps**                |                         |                                                   |        :x:         | A [GeolocationCoordinates](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates) like object indicating where the device is. |
-| **uri**                |        `String`         |                                                   | :white_check_mark: | Endpoint where we can reach the emulator gateway (host:port or http(s)://host:port).                                                            |
-| **volume**             |        `Number`         |                       `1.0`                       |        :x:         | Volume between [0, 1] when audio is enabled. 0 is muted, 1.0 is 100%                                                                            |
-| **width**              |        `Number`         |                                                   |        :x:         | The width of the component                                                                                                                      |
+"AudioVolumeDown" - 	Decreases the audio volume.
+"AudioVolumeUp"   -	Increases the audio volume.
+"Power"	         -  The Power button or key, turn off the device.
+"AppSwitch"       -  Should bring up the application switcher dialog.
+"GoHome"          -  Go to the home screen.
+"GoBack"          -  Open the previous screen you were looking at.
 
 **Note**: The user must have interacted with the page before you can set the volume to "unmuted" (muted = false). Otherwise the video
 will not play and will throw an error, which is currently not handled.
@@ -111,6 +101,19 @@ will not play and will throw an error, which is currently not handled.
 **Note**: The volume is the volume of the video element that is displayed, this is not the actual volume used inside the emulator. You can change the audio inside the emulator by sending the proper keys as documented
 above, or follow the steps in the [support](https://support.google.com/android/answer/9082609?hl=en) document
 on how to change the audio volume.
+
+prop | type | default | required | description
+---- | :----: | :-------: | :--------: | -----------
+**auth** | `Object` | `null` | :x: | The authentication service to use, or null for no authentication.
+**gps** | `Object` |  | :x: | A [GeolocationCoordinates](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates) like object indicating where the device is.
+**height** | `Number` |  | :x: | The height of the component
+**muted** | `Boolean` | `true` | :x: | True if the audio should be disabled.
+**onAudioStateChange** | `Function` | `(s) => {   console.debug("emulator audio: " + s); }` | :x: | Called when the audio becomes (un)available. True if audio is available, false otherwise.
+**onError** | `Function` | `(e) => {   console.error(e); }` | :x: | Callback that will be invoked in case of errors.
+**onStateChange** | `Function` | `(s) => {   console.debug("emulator state: " + s); }` | :x: | Called upon state change, one of ["connecting", "connected", "disconnected"]
+**uri** | `String` |  | :white_check_mark: | Endpoint where we can reach the emulator gateway (host:port or http(s)://host:port).
+**volume** | `Number` | `1.0` | :x: | Volume between [0, 1] when audio is enabled. 0 is muted, 1.0 is 100%
+**width** | `Number` |  | :x: | The width of the component
 
 ---
 

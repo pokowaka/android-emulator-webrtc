@@ -48,9 +48,9 @@ const getUrls = (uri) => {
 /**
  * A React component that displays a remote android emulator.
  *
- * The emulator will mount a png or webrtc view component to display the current state
- * of the emulator. It will translate mouse events on this component and send them
- * to the actual emulator.
+ * The emulator will mount a webrtc view component to display the current state
+ * of the emulator. It will translate mouse and touch events on this component and send them
+ * to the actual emulator over WebRTC Data Channels.
  *
  * #### Authentication Service
  *
@@ -58,12 +58,6 @@ const getUrls = (uri) => {
  *
  * - `authHeader()` which must return a set of headers that should be send along with a request.
  * - `unauthorized()` a function that gets called when a 401 was received.
- *
- * #### Type of view
- *
- * You usually want this to be webrtc as this will make use of the efficient
- * webrtc implementation. The png view will request screenshots, which are
- * very slow, and require the envoy proxy. You should not use this for remote emulators.
  *
  * Note that chrome will not autoplay the video if it is not muted and no interaction
  * with the page has taken place. See https://developers.google.com/web/updates/2017/09/autoplay-policy-changes.
@@ -79,6 +73,13 @@ const getUrls = (uri) => {
  * "AppSwitch"       -  Should bring up the application switcher dialog.
  * "GoHome"          -  Go to the home screen.
  * "GoBack"          -  Open the previous screen you were looking at.
+ *
+ * **Note**: The user must have interacted with the page before you can set the volume to "unmuted" (muted = false). Otherwise the video
+ * will not play and will throw an error, which is currently not handled.
+ *
+ * **Note**: The volume is the volume of the video element that is displayed, this is not the actual volume used inside the emulator. You can change the audio inside the emulator by sending the proper keys as documented
+ * above, or follow the steps in the [support](https://support.google.com/android/answer/9082609?hl=en) document
+ * on how to change the audio volume.
  *
  */
 const Emulator = forwardRef(
