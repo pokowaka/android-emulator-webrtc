@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from "react";
 import Proto from "../../../proto/emulator_controller_pb";
 import EmulatorStatus from "../net/emulator_status";
 import logger from "../net/logger";
@@ -160,22 +160,27 @@ export default function withMouseKeyHandler<P extends object>(
       jsep.send("mouse", request);
     };
 
-    const handleKey = (eventType: "KEYDOWN" | "KEYUP") => {
-      return (e: React.KeyboardEvent) => {
-        // Disable jumping to next control when pressing the space bar.
-        if (e.keyCode === 32) {
-          e.preventDefault();
-        }
-        const request = new (Proto as any).KeyboardEvent();
-        request.setEventtype(
-          eventType === "KEYDOWN"
-            ? (Proto as any).KeyboardEvent.KeyEventType.KEYDOWN
-            : (Proto as any).KeyboardEvent.KeyEventType.KEYUP
-        );
-        request.setKey(e.key);
-        jsep.send("keyboard", request);
-      };
-    };
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+      // Disable jumping to next control when pressing the space bar.
+      if (e.keyCode === 32) {
+        e.preventDefault();
+      }
+      const request = new (Proto as any).KeyboardEvent();
+      request.setEventtype((Proto as any).KeyboardEvent.KeyEventType.KEYDOWN);
+      request.setKey(e.key);
+      jsep.send("keyboard", request);
+    }, [jsep]);
+
+    const handleKeyUp = useCallback((e: React.KeyboardEvent) => {
+      // Disable jumping to next control when pressing the space bar.
+      if (e.keyCode === 32) {
+        e.preventDefault();
+      }
+      const request = new (Proto as any).KeyboardEvent();
+      request.setEventtype((Proto as any).KeyboardEvent.KeyEventType.KEYUP);
+      request.setKey(e.key);
+      jsep.send("keyboard", request);
+    }, [jsep]);
 
     // Properly handle the mouse events.
     const handleMouseDown = (e: React.MouseEvent) => {
@@ -281,20 +286,29 @@ export default function withMouseKeyHandler<P extends object>(
       jsep.send("touch", requestTouchEvent);
     };
 
-    const handleTouch = (minForce: number, maxForce: number) => {
-      return (e: React.TouchEvent) => {
-        // Make sure they are not processed as mouse events later on.
-        if (e.cancelable) {
-          e.preventDefault();
-        }
-        setTouchCoordinates(
-          e.nativeEvent.type,
-          e.nativeEvent.changedTouches,
-          minForce,
-          maxForce
-        );
-      };
-    };
+    const handleTouchActive = useCallback((e: React.TouchEvent) => {
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+      setTouchCoordinates(
+        e.nativeEvent.type,
+        e.nativeEvent.changedTouches,
+        0.01,
+        1.0
+      );
+    }, [jsep, deviceWidth, deviceHeight]);
+
+    const handleTouchInactive = useCallback((e: React.TouchEvent) => {
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+      setTouchCoordinates(
+        e.nativeEvent.type,
+        e.nativeEvent.changedTouches,
+        0.0,
+        0.0
+      );
+    }, [jsep, deviceWidth, deviceHeight]);
 
     const onMouseOut = (e: React.MouseEvent) => {
       handleMouseUp(e);
@@ -302,16 +316,16 @@ export default function withMouseKeyHandler<P extends object>(
 
     return (
       <div
-        onTouchStart={handleTouch(0.01, 1.0)}
-        onTouchMove={handleTouch(0.01, 1.0)}
-        onTouchEnd={handleTouch(0.0, 0.0)}
-        onTouchCancel={handleTouch(0.0, 0.0)}
+        onTouchStart={handleTouchActive}
+        onTouchMove={handleTouchActive}
+        onTouchEnd={handleTouchInactive}
+        onTouchCancel={handleTouchInactive}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseOut={onMouseOut}
-        onKeyDown={handleKey("KEYDOWN")}
-        onKeyUp={handleKey("KEYUP")}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
         onContextMenu={onContextMenu}
         tabIndex={0}
         ref={handlerRef}
