@@ -16,6 +16,17 @@
 
 import logger from "./logger";
 
+export interface AuthService {
+  authHeader?(): Record<string, string>;
+  unauthorized?(): void;
+}
+
+export interface EmulatorStatusData {
+  status?: string;
+  hardwareConfig?: Record<string, string>;
+  [key: string]: any;
+}
+
 /**
  * Utility class to query and manage the emulator's status by communicating
  * with its REST configuration endpoint. It parses the hardware configuration
@@ -25,16 +36,19 @@ import logger from "./logger";
  * @class EmulatorStatus
  */
 class EmulatorStatus {
+  statusUrl: string;
+  auth: AuthService | null;
+  status: EmulatorStatusData | null;
+
   /**
    * Creates an EmulatorStatus object that can retrieve the status of the running emulator.
    *
    * @param {string} statusUrl The REST endpoint to retrieve status.
    * @param {Object} [auth] The authentication service to use, or null for no authentication.
-   * @param {function} [auth.authHeader] Function returning authorization headers.
    */
-  constructor(statusUrl, auth) {
+  constructor(statusUrl: string, auth?: AuthService | null) {
     this.statusUrl = statusUrl;
-    this.auth = auth;
+    this.auth = auth || null;
     this.status = null;
   }
 
@@ -44,7 +58,7 @@ class EmulatorStatus {
    * @returns {Object|null} The cached emulator status or null if not yet loaded.
    * @memberof EmulatorStatus
    */
-  getStatus = () => {
+  getStatus = (): EmulatorStatusData | null => {
     return this.status;
   };
 
@@ -55,7 +69,7 @@ class EmulatorStatus {
    * @param {boolean} [cache=false] If true, uses the cached status if available instead of fetching.
    * @memberof EmulatorStatus
    */
-  updateStatus = (fnNotify, cache) => {
+  updateStatus = (fnNotify: (status: EmulatorStatusData) => void, cache?: boolean) => {
     if (!this.statusUrl) {
       return;
     }
@@ -64,7 +78,7 @@ class EmulatorStatus {
       return this.status;
     }
 
-    const headers = {
+    const headers: Record<string, string> = {
       Accept: "application/json",
     };
     if (this.auth && this.auth.authHeader) {
@@ -78,7 +92,7 @@ class EmulatorStatus {
         }
         return response.json();
       })
-      .then((data) => {
+      .then((data: EmulatorStatusData) => {
         this.status = data;
         fnNotify(this.status);
       })
