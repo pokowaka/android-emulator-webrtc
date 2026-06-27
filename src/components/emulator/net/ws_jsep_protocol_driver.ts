@@ -471,7 +471,7 @@ export default class WsJsepProtocol {
    * @param label The channel label ("mouse", "keyboard", "touch").
    * @param msg The protobuf message instance.
    */
-  send(label: string, msg: any) {
+  send = (label: string, msg: any) => {
     let bytes = msg.serializeBinary();
     let forwarder = this.event_forwarders[label];
     if (this.connected && forwarder && forwarder.readyState === "open") {
@@ -491,7 +491,7 @@ export default class WsJsepProtocol {
     } else {
       logger.warn(`Data channel '${label}' is not open. Event was dropped.`);
     }
-  }
+  };
 
   /**
    * Cleans up the current connection's WebSocket and PeerConnection state,
