@@ -1,16 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { Emulator, logger } from '../../src';
+import { EmulatorRef } from '../../src/components/emulator/emulator';
 
 logger.setLevel("debug");
 
 function App() {
-  const [uri, setUri] = useState(window.location.host);
-  const [connected, setConnected] = useState(false);
-  const [gps, setGps] = useState({ latitude: 37.4220, longitude: -122.0841 });
-  const [inputGps, setInputGps] = useState({ lat: '37.4220', lng: '-122.0841' });
-  const emulatorRef = useRef(null);
+  const [uri, setUri] = useState<string>(window.location.host);
+  const [connected, setConnected] = useState<boolean>(false);
+  const [gps, setGps] = useState<{ latitude: number; longitude: number }>({ latitude: 37.4220, longitude: -122.0841 });
+  const [inputGps, setInputGps] = useState<{ lat: string; lng: string }>({ lat: '37.4220', lng: '-122.0841' });
+  const emulatorRef = useRef<EmulatorRef>(null);
 
-  const handleConnect = (e) => {
+  const handleConnect = (e: React.FormEvent) => {
     e.preventDefault();
     setConnected(true);
   };
@@ -19,13 +20,13 @@ function App() {
     setConnected(false);
   };
 
-  const sendKey = (key) => {
+  const sendKey = (key: string) => {
     if (emulatorRef.current) {
       emulatorRef.current.sendKey(key);
     }
   };
 
-  const handleGpsSubmit = (e) => {
+  const handleGpsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setGps({
       latitude: parseFloat(inputGps.lat),
@@ -130,7 +131,7 @@ function App() {
   );
 }
 
-const btnStyle = {
+const btnStyle: React.CSSProperties = {
   padding: '8px 16px',
   background: '#e9ecef',
   color: '#495057',
@@ -141,7 +142,7 @@ const btnStyle = {
   transition: 'background 0.2s',
 };
 
-const inputStyle = {
+const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '6px',
   boxSizing: 'border-box',
