@@ -1049,8 +1049,7 @@ proto.android.emulation.control.VmRunState.RunState = {
  * @return {!proto.android.emulation.control.VmRunState.RunState}
  */
 proto.android.emulation.control.VmRunState.prototype.getState = function () {
-  return (/** @type {!proto.android.emulation.control.VmRunState.RunState} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.VmRunState.RunState} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -1174,8 +1173,7 @@ proto.android.emulation.control.ParameterValue.serializeBinaryToWriter = functio
  * @return {!Array<number>}
  */
 proto.android.emulation.control.ParameterValue.prototype.getDataList = function () {
-  return (/** @type {!Array<number>} */jspb.Message.getRepeatedFloatingPointField(this, 1)
-  );
+  return /** @type {!Array<number>} */jspb.Message.getRepeatedFloatingPointField(this, 1);
 };
 
 /**
@@ -1362,8 +1360,7 @@ proto.android.emulation.control.PhysicalModelValue.PhysicalType = {
  * @return {!proto.android.emulation.control.PhysicalModelValue.PhysicalType}
  */
 proto.android.emulation.control.PhysicalModelValue.prototype.getTarget = function () {
-  return (/** @type {!proto.android.emulation.control.PhysicalModelValue.PhysicalType} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.PhysicalModelValue.PhysicalType} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -1379,8 +1376,7 @@ proto.android.emulation.control.PhysicalModelValue.prototype.setTarget = functio
  * @return {!proto.android.emulation.control.PhysicalModelValue.State}
  */
 proto.android.emulation.control.PhysicalModelValue.prototype.getStatus = function () {
-  return (/** @type {!proto.android.emulation.control.PhysicalModelValue.State} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {!proto.android.emulation.control.PhysicalModelValue.State} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -1396,9 +1392,7 @@ proto.android.emulation.control.PhysicalModelValue.prototype.setStatus = functio
  * @return {?proto.android.emulation.control.ParameterValue}
  */
 proto.android.emulation.control.PhysicalModelValue.prototype.getValue = function () {
-  return (/** @type{?proto.android.emulation.control.ParameterValue} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.ParameterValue, 3)
-  );
+  return /** @type{?proto.android.emulation.control.ParameterValue} */jspb.Message.getWrapperField(this, proto.android.emulation.control.ParameterValue, 3);
 };
 
 /**
@@ -1578,8 +1572,7 @@ proto.android.emulation.control.SensorValue.SensorType = {
  * @return {!proto.android.emulation.control.SensorValue.SensorType}
  */
 proto.android.emulation.control.SensorValue.prototype.getTarget = function () {
-  return (/** @type {!proto.android.emulation.control.SensorValue.SensorType} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.SensorValue.SensorType} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -1595,8 +1588,7 @@ proto.android.emulation.control.SensorValue.prototype.setTarget = function (valu
  * @return {!proto.android.emulation.control.SensorValue.State}
  */
 proto.android.emulation.control.SensorValue.prototype.getStatus = function () {
-  return (/** @type {!proto.android.emulation.control.SensorValue.State} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {!proto.android.emulation.control.SensorValue.State} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -1612,9 +1604,7 @@ proto.android.emulation.control.SensorValue.prototype.setStatus = function (valu
  * @return {?proto.android.emulation.control.ParameterValue}
  */
 proto.android.emulation.control.SensorValue.prototype.getValue = function () {
-  return (/** @type{?proto.android.emulation.control.ParameterValue} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.ParameterValue, 3)
-  );
+  return /** @type{?proto.android.emulation.control.ParameterValue} */jspb.Message.getWrapperField(this, proto.android.emulation.control.ParameterValue, 3);
 };
 
 /**
@@ -1763,8 +1753,7 @@ proto.android.emulation.control.BrightnessValue.LightType = {
  * @return {!proto.android.emulation.control.BrightnessValue.LightType}
  */
 proto.android.emulation.control.BrightnessValue.prototype.getTarget = function () {
-  return (/** @type {!proto.android.emulation.control.BrightnessValue.LightType} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.BrightnessValue.LightType} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -1780,8 +1769,7 @@ proto.android.emulation.control.BrightnessValue.prototype.setTarget = function (
  * @return {number}
  */
 proto.android.emulation.control.BrightnessValue.prototype.getValue = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -1896,8 +1884,7 @@ proto.android.emulation.control.DisplayMode.serializeBinaryToWriter = function (
  * @return {!proto.android.emulation.control.DisplayModeValue}
  */
 proto.android.emulation.control.DisplayMode.prototype.getValue = function () {
-  return (/** @type {!proto.android.emulation.control.DisplayModeValue} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.DisplayModeValue} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -2064,8 +2051,7 @@ proto.android.emulation.control.LogMessage.LogType = {
  * @return {string}
  */
 proto.android.emulation.control.LogMessage.prototype.getContents = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "");
 };
 
 /**
@@ -2081,8 +2067,7 @@ proto.android.emulation.control.LogMessage.prototype.setContents = function (val
  * @return {number}
  */
 proto.android.emulation.control.LogMessage.prototype.getStart = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -2098,8 +2083,7 @@ proto.android.emulation.control.LogMessage.prototype.setStart = function (value)
  * @return {number}
  */
 proto.android.emulation.control.LogMessage.prototype.getNext = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -2115,8 +2099,7 @@ proto.android.emulation.control.LogMessage.prototype.setNext = function (value) 
  * @return {!proto.android.emulation.control.LogMessage.LogType}
  */
 proto.android.emulation.control.LogMessage.prototype.getSort = function () {
-  return (/** @type {!proto.android.emulation.control.LogMessage.LogType} */jspb.Message.getFieldWithDefault(this, 4, 0)
-  );
+  return /** @type {!proto.android.emulation.control.LogMessage.LogType} */jspb.Message.getFieldWithDefault(this, 4, 0);
 };
 
 /**
@@ -2132,9 +2115,7 @@ proto.android.emulation.control.LogMessage.prototype.setSort = function (value) 
  * @return {!Array<!proto.android.emulation.control.LogcatEntry>}
  */
 proto.android.emulation.control.LogMessage.prototype.getEntriesList = function () {
-  return (/** @type{!Array<!proto.android.emulation.control.LogcatEntry>} */
-    jspb.Message.getRepeatedWrapperField(this, proto.android.emulation.control.LogcatEntry, 5)
-  );
+  return /** @type{!Array<!proto.android.emulation.control.LogcatEntry>} */jspb.Message.getRepeatedWrapperField(this, proto.android.emulation.control.LogcatEntry, 5);
 };
 
 /**
@@ -2326,8 +2307,7 @@ proto.android.emulation.control.LogcatEntry.LogLevel = {
  * @return {number}
  */
 proto.android.emulation.control.LogcatEntry.prototype.getTimestamp = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -2343,8 +2323,7 @@ proto.android.emulation.control.LogcatEntry.prototype.setTimestamp = function (v
  * @return {number}
  */
 proto.android.emulation.control.LogcatEntry.prototype.getPid = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -2360,8 +2339,7 @@ proto.android.emulation.control.LogcatEntry.prototype.setPid = function (value) 
  * @return {number}
  */
 proto.android.emulation.control.LogcatEntry.prototype.getTid = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -2377,8 +2355,7 @@ proto.android.emulation.control.LogcatEntry.prototype.setTid = function (value) 
  * @return {!proto.android.emulation.control.LogcatEntry.LogLevel}
  */
 proto.android.emulation.control.LogcatEntry.prototype.getLevel = function () {
-  return (/** @type {!proto.android.emulation.control.LogcatEntry.LogLevel} */jspb.Message.getFieldWithDefault(this, 4, 0)
-  );
+  return /** @type {!proto.android.emulation.control.LogcatEntry.LogLevel} */jspb.Message.getFieldWithDefault(this, 4, 0);
 };
 
 /**
@@ -2394,8 +2371,7 @@ proto.android.emulation.control.LogcatEntry.prototype.setLevel = function (value
  * @return {string}
  */
 proto.android.emulation.control.LogcatEntry.prototype.getTag = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 5, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 5, "");
 };
 
 /**
@@ -2411,8 +2387,7 @@ proto.android.emulation.control.LogcatEntry.prototype.setTag = function (value) 
  * @return {string}
  */
 proto.android.emulation.control.LogcatEntry.prototype.getMsg = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 6, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 6, "");
 };
 
 /**
@@ -2558,8 +2533,7 @@ proto.android.emulation.control.VmConfiguration.VmHypervisorType = {
  * @return {!proto.android.emulation.control.VmConfiguration.VmHypervisorType}
  */
 proto.android.emulation.control.VmConfiguration.prototype.getHypervisortype = function () {
-  return (/** @type {!proto.android.emulation.control.VmConfiguration.VmHypervisorType} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.VmConfiguration.VmHypervisorType} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -2575,8 +2549,7 @@ proto.android.emulation.control.VmConfiguration.prototype.setHypervisortype = fu
  * @return {number}
  */
 proto.android.emulation.control.VmConfiguration.prototype.getNumberofcpucores = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -2592,8 +2565,7 @@ proto.android.emulation.control.VmConfiguration.prototype.setNumberofcpucores = 
  * @return {number}
  */
 proto.android.emulation.control.VmConfiguration.prototype.getRamsizebytes = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -2708,8 +2680,7 @@ proto.android.emulation.control.ClipData.serializeBinaryToWriter = function (mes
  * @return {string}
  */
 proto.android.emulation.control.ClipData.prototype.getText = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "");
 };
 
 /**
@@ -2886,8 +2857,7 @@ proto.android.emulation.control.Touch.EventExpiration = {
  * @return {number}
  */
 proto.android.emulation.control.Touch.prototype.getX = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -2903,8 +2873,7 @@ proto.android.emulation.control.Touch.prototype.setX = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.Touch.prototype.getY = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -2920,8 +2889,7 @@ proto.android.emulation.control.Touch.prototype.setY = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.Touch.prototype.getIdentifier = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -2937,8 +2905,7 @@ proto.android.emulation.control.Touch.prototype.setIdentifier = function (value)
  * @return {number}
  */
 proto.android.emulation.control.Touch.prototype.getPressure = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0);
 };
 
 /**
@@ -2954,8 +2921,7 @@ proto.android.emulation.control.Touch.prototype.setPressure = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.Touch.prototype.getTouchMajor = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 5, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 5, 0);
 };
 
 /**
@@ -2971,8 +2937,7 @@ proto.android.emulation.control.Touch.prototype.setTouchMajor = function (value)
  * @return {number}
  */
 proto.android.emulation.control.Touch.prototype.getTouchMinor = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 6, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 6, 0);
 };
 
 /**
@@ -2988,8 +2953,7 @@ proto.android.emulation.control.Touch.prototype.setTouchMinor = function (value)
  * @return {!proto.android.emulation.control.Touch.EventExpiration}
  */
 proto.android.emulation.control.Touch.prototype.getExpiration = function () {
-  return (/** @type {!proto.android.emulation.control.Touch.EventExpiration} */jspb.Message.getFieldWithDefault(this, 7, 0)
-  );
+  return /** @type {!proto.android.emulation.control.Touch.EventExpiration} */jspb.Message.getFieldWithDefault(this, 7, 0);
 };
 
 /**
@@ -3121,9 +3085,7 @@ proto.android.emulation.control.TouchEvent.serializeBinaryToWriter = function (m
  * @return {!Array<!proto.android.emulation.control.Touch>}
  */
 proto.android.emulation.control.TouchEvent.prototype.getTouchesList = function () {
-  return (/** @type{!Array<!proto.android.emulation.control.Touch>} */
-    jspb.Message.getRepeatedWrapperField(this, proto.android.emulation.control.Touch, 1)
-  );
+  return /** @type{!Array<!proto.android.emulation.control.Touch>} */jspb.Message.getRepeatedWrapperField(this, proto.android.emulation.control.Touch, 1);
 };
 
 /**
@@ -3156,8 +3118,7 @@ proto.android.emulation.control.TouchEvent.prototype.clearTouchesList = function
  * @return {number}
  */
 proto.android.emulation.control.TouchEvent.prototype.getDisplay = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -3299,8 +3260,7 @@ proto.android.emulation.control.MouseEvent.serializeBinaryToWriter = function (m
  * @return {number}
  */
 proto.android.emulation.control.MouseEvent.prototype.getX = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -3316,8 +3276,7 @@ proto.android.emulation.control.MouseEvent.prototype.setX = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.MouseEvent.prototype.getY = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -3333,8 +3292,7 @@ proto.android.emulation.control.MouseEvent.prototype.setY = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.MouseEvent.prototype.getButtons = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -3350,8 +3308,7 @@ proto.android.emulation.control.MouseEvent.prototype.setButtons = function (valu
  * @return {number}
  */
 proto.android.emulation.control.MouseEvent.prototype.getDisplay = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0);
 };
 
 /**
@@ -3484,8 +3441,7 @@ proto.android.emulation.control.WheelEvent.serializeBinaryToWriter = function (m
  * @return {number}
  */
 proto.android.emulation.control.WheelEvent.prototype.getDx = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -3501,8 +3457,7 @@ proto.android.emulation.control.WheelEvent.prototype.setDx = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.WheelEvent.prototype.getDy = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -3518,8 +3473,7 @@ proto.android.emulation.control.WheelEvent.prototype.setDy = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.WheelEvent.prototype.getDisplay = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -3690,8 +3644,7 @@ proto.android.emulation.control.KeyboardEvent.KeyEventType = {
  * @return {!proto.android.emulation.control.KeyboardEvent.KeyCodeType}
  */
 proto.android.emulation.control.KeyboardEvent.prototype.getCodetype = function () {
-  return (/** @type {!proto.android.emulation.control.KeyboardEvent.KeyCodeType} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.KeyboardEvent.KeyCodeType} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -3707,8 +3660,7 @@ proto.android.emulation.control.KeyboardEvent.prototype.setCodetype = function (
  * @return {!proto.android.emulation.control.KeyboardEvent.KeyEventType}
  */
 proto.android.emulation.control.KeyboardEvent.prototype.getEventtype = function () {
-  return (/** @type {!proto.android.emulation.control.KeyboardEvent.KeyEventType} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {!proto.android.emulation.control.KeyboardEvent.KeyEventType} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -3724,8 +3676,7 @@ proto.android.emulation.control.KeyboardEvent.prototype.setEventtype = function 
  * @return {number}
  */
 proto.android.emulation.control.KeyboardEvent.prototype.getKeycode = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -3741,8 +3692,7 @@ proto.android.emulation.control.KeyboardEvent.prototype.setKeycode = function (v
  * @return {string}
  */
 proto.android.emulation.control.KeyboardEvent.prototype.getKey = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 4, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 4, "");
 };
 
 /**
@@ -3758,8 +3708,7 @@ proto.android.emulation.control.KeyboardEvent.prototype.setKey = function (value
  * @return {string}
  */
 proto.android.emulation.control.KeyboardEvent.prototype.getText = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 5, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 5, "");
 };
 
 /**
@@ -3883,8 +3832,7 @@ proto.android.emulation.control.Fingerprint.serializeBinaryToWriter = function (
  * @return {boolean}
  */
 proto.android.emulation.control.Fingerprint.prototype.getIstouching = function () {
-  return (/** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 1, false)
-  );
+  return /** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 1, false);
 };
 
 /**
@@ -3900,8 +3848,7 @@ proto.android.emulation.control.Fingerprint.prototype.setIstouching = function (
  * @return {number}
  */
 proto.android.emulation.control.Fingerprint.prototype.getTouchid = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -4070,8 +4017,7 @@ proto.android.emulation.control.GpsState.serializeBinaryToWriter = function (mes
  * @return {boolean}
  */
 proto.android.emulation.control.GpsState.prototype.getPassiveupdate = function () {
-  return (/** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 1, false)
-  );
+  return /** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 1, false);
 };
 
 /**
@@ -4087,8 +4033,7 @@ proto.android.emulation.control.GpsState.prototype.setPassiveupdate = function (
  * @return {number}
  */
 proto.android.emulation.control.GpsState.prototype.getLatitude = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0);
 };
 
 /**
@@ -4104,8 +4049,7 @@ proto.android.emulation.control.GpsState.prototype.setLatitude = function (value
  * @return {number}
  */
 proto.android.emulation.control.GpsState.prototype.getLongitude = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0);
 };
 
 /**
@@ -4121,8 +4065,7 @@ proto.android.emulation.control.GpsState.prototype.setLongitude = function (valu
  * @return {number}
  */
 proto.android.emulation.control.GpsState.prototype.getSpeed = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 4, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 4, 0.0);
 };
 
 /**
@@ -4138,8 +4081,7 @@ proto.android.emulation.control.GpsState.prototype.setSpeed = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.GpsState.prototype.getBearing = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 5, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 5, 0.0);
 };
 
 /**
@@ -4155,8 +4097,7 @@ proto.android.emulation.control.GpsState.prototype.setBearing = function (value)
  * @return {number}
  */
 proto.android.emulation.control.GpsState.prototype.getAltitude = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 6, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 6, 0.0);
 };
 
 /**
@@ -4172,8 +4113,7 @@ proto.android.emulation.control.GpsState.prototype.setAltitude = function (value
  * @return {number}
  */
 proto.android.emulation.control.GpsState.prototype.getSatellites = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 7, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 7, 0);
 };
 
 /**
@@ -4365,8 +4305,7 @@ proto.android.emulation.control.BatteryState.BatteryHealth = {
  * @return {boolean}
  */
 proto.android.emulation.control.BatteryState.prototype.getHasbattery = function () {
-  return (/** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 1, false)
-  );
+  return /** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 1, false);
 };
 
 /**
@@ -4382,8 +4321,7 @@ proto.android.emulation.control.BatteryState.prototype.setHasbattery = function 
  * @return {boolean}
  */
 proto.android.emulation.control.BatteryState.prototype.getIspresent = function () {
-  return (/** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 2, false)
-  );
+  return /** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 2, false);
 };
 
 /**
@@ -4399,8 +4337,7 @@ proto.android.emulation.control.BatteryState.prototype.setIspresent = function (
  * @return {!proto.android.emulation.control.BatteryState.BatteryCharger}
  */
 proto.android.emulation.control.BatteryState.prototype.getCharger = function () {
-  return (/** @type {!proto.android.emulation.control.BatteryState.BatteryCharger} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {!proto.android.emulation.control.BatteryState.BatteryCharger} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -4416,8 +4353,7 @@ proto.android.emulation.control.BatteryState.prototype.setCharger = function (va
  * @return {number}
  */
 proto.android.emulation.control.BatteryState.prototype.getChargelevel = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0);
 };
 
 /**
@@ -4433,8 +4369,7 @@ proto.android.emulation.control.BatteryState.prototype.setChargelevel = function
  * @return {!proto.android.emulation.control.BatteryState.BatteryHealth}
  */
 proto.android.emulation.control.BatteryState.prototype.getHealth = function () {
-  return (/** @type {!proto.android.emulation.control.BatteryState.BatteryHealth} */jspb.Message.getFieldWithDefault(this, 5, 0)
-  );
+  return /** @type {!proto.android.emulation.control.BatteryState.BatteryHealth} */jspb.Message.getFieldWithDefault(this, 5, 0);
 };
 
 /**
@@ -4450,8 +4385,7 @@ proto.android.emulation.control.BatteryState.prototype.setHealth = function (val
  * @return {!proto.android.emulation.control.BatteryState.BatteryStatus}
  */
 proto.android.emulation.control.BatteryState.prototype.getStatus = function () {
-  return (/** @type {!proto.android.emulation.control.BatteryState.BatteryStatus} */jspb.Message.getFieldWithDefault(this, 6, 0)
-  );
+  return /** @type {!proto.android.emulation.control.BatteryState.BatteryStatus} */jspb.Message.getFieldWithDefault(this, 6, 0);
 };
 
 /**
@@ -4583,8 +4517,7 @@ proto.android.emulation.control.ImageTransport.TransportChannel = {
  * @return {!proto.android.emulation.control.ImageTransport.TransportChannel}
  */
 proto.android.emulation.control.ImageTransport.prototype.getChannel = function () {
-  return (/** @type {!proto.android.emulation.control.ImageTransport.TransportChannel} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.ImageTransport.TransportChannel} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -4600,8 +4533,7 @@ proto.android.emulation.control.ImageTransport.prototype.setChannel = function (
  * @return {string}
  */
 proto.android.emulation.control.ImageTransport.prototype.getHandle = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 2, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 2, "");
 };
 
 /**
@@ -4743,8 +4675,7 @@ proto.android.emulation.control.FoldedDisplay.serializeBinaryToWriter = function
  * @return {number}
  */
 proto.android.emulation.control.FoldedDisplay.prototype.getWidth = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -4760,8 +4691,7 @@ proto.android.emulation.control.FoldedDisplay.prototype.setWidth = function (val
  * @return {number}
  */
 proto.android.emulation.control.FoldedDisplay.prototype.getHeight = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -4777,8 +4707,7 @@ proto.android.emulation.control.FoldedDisplay.prototype.setHeight = function (va
  * @return {number}
  */
 proto.android.emulation.control.FoldedDisplay.prototype.getXoffset = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -4794,8 +4723,7 @@ proto.android.emulation.control.FoldedDisplay.prototype.setXoffset = function (v
  * @return {number}
  */
 proto.android.emulation.control.FoldedDisplay.prototype.getYoffset = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0);
 };
 
 /**
@@ -4985,8 +4913,7 @@ proto.android.emulation.control.ImageFormat.ImgFormat = {
  * @return {!proto.android.emulation.control.ImageFormat.ImgFormat}
  */
 proto.android.emulation.control.ImageFormat.prototype.getFormat = function () {
-  return (/** @type {!proto.android.emulation.control.ImageFormat.ImgFormat} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.ImageFormat.ImgFormat} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -5002,9 +4929,7 @@ proto.android.emulation.control.ImageFormat.prototype.setFormat = function (valu
  * @return {?proto.android.emulation.control.Rotation}
  */
 proto.android.emulation.control.ImageFormat.prototype.getRotation = function () {
-  return (/** @type{?proto.android.emulation.control.Rotation} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.Rotation, 2)
-  );
+  return /** @type{?proto.android.emulation.control.Rotation} */jspb.Message.getWrapperField(this, proto.android.emulation.control.Rotation, 2);
 };
 
 /**
@@ -5036,8 +4961,7 @@ proto.android.emulation.control.ImageFormat.prototype.hasRotation = function () 
  * @return {number}
  */
 proto.android.emulation.control.ImageFormat.prototype.getWidth = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -5053,8 +4977,7 @@ proto.android.emulation.control.ImageFormat.prototype.setWidth = function (value
  * @return {number}
  */
 proto.android.emulation.control.ImageFormat.prototype.getHeight = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0);
 };
 
 /**
@@ -5070,8 +4993,7 @@ proto.android.emulation.control.ImageFormat.prototype.setHeight = function (valu
  * @return {number}
  */
 proto.android.emulation.control.ImageFormat.prototype.getDisplay = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 5, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 5, 0);
 };
 
 /**
@@ -5087,9 +5009,7 @@ proto.android.emulation.control.ImageFormat.prototype.setDisplay = function (val
  * @return {?proto.android.emulation.control.ImageTransport}
  */
 proto.android.emulation.control.ImageFormat.prototype.getTransport = function () {
-  return (/** @type{?proto.android.emulation.control.ImageTransport} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.ImageTransport, 6)
-  );
+  return /** @type{?proto.android.emulation.control.ImageTransport} */jspb.Message.getWrapperField(this, proto.android.emulation.control.ImageTransport, 6);
 };
 
 /**
@@ -5121,9 +5041,7 @@ proto.android.emulation.control.ImageFormat.prototype.hasTransport = function ()
  * @return {?proto.android.emulation.control.FoldedDisplay}
  */
 proto.android.emulation.control.ImageFormat.prototype.getFoldeddisplay = function () {
-  return (/** @type{?proto.android.emulation.control.FoldedDisplay} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.FoldedDisplay, 7)
-  );
+  return /** @type{?proto.android.emulation.control.FoldedDisplay} */jspb.Message.getWrapperField(this, proto.android.emulation.control.FoldedDisplay, 7);
 };
 
 /**
@@ -5155,8 +5073,7 @@ proto.android.emulation.control.ImageFormat.prototype.hasFoldeddisplay = functio
  * @return {!proto.android.emulation.control.DisplayModeValue}
  */
 proto.android.emulation.control.ImageFormat.prototype.getDisplaymode = function () {
-  return (/** @type {!proto.android.emulation.control.DisplayModeValue} */jspb.Message.getFieldWithDefault(this, 8, 0)
-  );
+  return /** @type {!proto.android.emulation.control.DisplayModeValue} */jspb.Message.getFieldWithDefault(this, 8, 0);
 };
 
 /**
@@ -5317,9 +5234,7 @@ proto.android.emulation.control.Image.serializeBinaryToWriter = function (messag
  * @return {?proto.android.emulation.control.ImageFormat}
  */
 proto.android.emulation.control.Image.prototype.getFormat = function () {
-  return (/** @type{?proto.android.emulation.control.ImageFormat} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.ImageFormat, 1)
-  );
+  return /** @type{?proto.android.emulation.control.ImageFormat} */jspb.Message.getWrapperField(this, proto.android.emulation.control.ImageFormat, 1);
 };
 
 /**
@@ -5351,8 +5266,7 @@ proto.android.emulation.control.Image.prototype.hasFormat = function () {
  * @return {number}
  */
 proto.android.emulation.control.Image.prototype.getWidth = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -5368,8 +5282,7 @@ proto.android.emulation.control.Image.prototype.setWidth = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.Image.prototype.getHeight = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -5385,8 +5298,7 @@ proto.android.emulation.control.Image.prototype.setHeight = function (value) {
  * @return {!(string|Uint8Array)}
  */
 proto.android.emulation.control.Image.prototype.getImage = function () {
-  return (/** @type {!(string|Uint8Array)} */jspb.Message.getFieldWithDefault(this, 4, "")
-  );
+  return /** @type {!(string|Uint8Array)} */jspb.Message.getFieldWithDefault(this, 4, "");
 };
 
 /**
@@ -5395,8 +5307,7 @@ proto.android.emulation.control.Image.prototype.getImage = function () {
  * @return {string}
  */
 proto.android.emulation.control.Image.prototype.getImage_asB64 = function () {
-  return (/** @type {string} */jspb.Message.bytesAsB64(this.getImage())
-  );
+  return /** @type {string} */jspb.Message.bytesAsB64(this.getImage());
 };
 
 /**
@@ -5407,8 +5318,7 @@ proto.android.emulation.control.Image.prototype.getImage_asB64 = function () {
  * @return {!Uint8Array}
  */
 proto.android.emulation.control.Image.prototype.getImage_asU8 = function () {
-  return (/** @type {!Uint8Array} */jspb.Message.bytesAsU8(this.getImage())
-  );
+  return /** @type {!Uint8Array} */jspb.Message.bytesAsU8(this.getImage());
 };
 
 /**
@@ -5424,8 +5334,7 @@ proto.android.emulation.control.Image.prototype.setImage = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.Image.prototype.getSeq = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 5, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 5, 0);
 };
 
 /**
@@ -5441,8 +5350,7 @@ proto.android.emulation.control.Image.prototype.setSeq = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.Image.prototype.getTimestampus = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 6, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 6, 0);
 };
 
 /**
@@ -5594,8 +5502,7 @@ proto.android.emulation.control.Rotation.SkinRotation = {
  * @return {!proto.android.emulation.control.Rotation.SkinRotation}
  */
 proto.android.emulation.control.Rotation.prototype.getRotation = function () {
-  return (/** @type {!proto.android.emulation.control.Rotation.SkinRotation} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.Rotation.SkinRotation} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -5611,8 +5518,7 @@ proto.android.emulation.control.Rotation.prototype.setRotation = function (value
  * @return {number}
  */
 proto.android.emulation.control.Rotation.prototype.getXaxis = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0);
 };
 
 /**
@@ -5628,8 +5534,7 @@ proto.android.emulation.control.Rotation.prototype.setXaxis = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.Rotation.prototype.getYaxis = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0);
 };
 
 /**
@@ -5645,8 +5550,7 @@ proto.android.emulation.control.Rotation.prototype.setYaxis = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.Rotation.prototype.getZaxis = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 4, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 4, 0.0);
 };
 
 /**
@@ -5783,8 +5687,7 @@ proto.android.emulation.control.PhoneCall.Operation = {
  * @return {!proto.android.emulation.control.PhoneCall.Operation}
  */
 proto.android.emulation.control.PhoneCall.prototype.getOperation = function () {
-  return (/** @type {!proto.android.emulation.control.PhoneCall.Operation} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.PhoneCall.Operation} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -5800,8 +5703,7 @@ proto.android.emulation.control.PhoneCall.prototype.setOperation = function (val
  * @return {string}
  */
 proto.android.emulation.control.PhoneCall.prototype.getNumber = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 2, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 2, "");
 };
 
 /**
@@ -5928,8 +5830,7 @@ proto.android.emulation.control.PhoneResponse.Response = {
  * @return {!proto.android.emulation.control.PhoneResponse.Response}
  */
 proto.android.emulation.control.PhoneResponse.prototype.getResponse = function () {
-  return (/** @type {!proto.android.emulation.control.PhoneResponse.Response} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.PhoneResponse.Response} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -6053,8 +5954,7 @@ proto.android.emulation.control.Entry.serializeBinaryToWriter = function (messag
  * @return {string}
  */
 proto.android.emulation.control.Entry.prototype.getKey = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "");
 };
 
 /**
@@ -6070,8 +5970,7 @@ proto.android.emulation.control.Entry.prototype.setKey = function (value) {
  * @return {string}
  */
 proto.android.emulation.control.Entry.prototype.getValue = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 2, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 2, "");
 };
 
 /**
@@ -6194,9 +6093,7 @@ proto.android.emulation.control.EntryList.serializeBinaryToWriter = function (me
  * @return {!Array<!proto.android.emulation.control.Entry>}
  */
 proto.android.emulation.control.EntryList.prototype.getEntryList = function () {
-  return (/** @type{!Array<!proto.android.emulation.control.Entry>} */
-    jspb.Message.getRepeatedWrapperField(this, proto.android.emulation.control.Entry, 1)
-  );
+  return /** @type{!Array<!proto.android.emulation.control.Entry>} */jspb.Message.getRepeatedWrapperField(this, proto.android.emulation.control.Entry, 1);
 };
 
 /**
@@ -6366,8 +6263,7 @@ proto.android.emulation.control.EmulatorStatus.serializeBinaryToWriter = functio
  * @return {string}
  */
 proto.android.emulation.control.EmulatorStatus.prototype.getVersion = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "");
 };
 
 /**
@@ -6383,8 +6279,7 @@ proto.android.emulation.control.EmulatorStatus.prototype.setVersion = function (
  * @return {number}
  */
 proto.android.emulation.control.EmulatorStatus.prototype.getUptime = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -6400,8 +6295,7 @@ proto.android.emulation.control.EmulatorStatus.prototype.setUptime = function (v
  * @return {boolean}
  */
 proto.android.emulation.control.EmulatorStatus.prototype.getBooted = function () {
-  return (/** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 3, false)
-  );
+  return /** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 3, false);
 };
 
 /**
@@ -6417,9 +6311,7 @@ proto.android.emulation.control.EmulatorStatus.prototype.setBooted = function (v
  * @return {?proto.android.emulation.control.VmConfiguration}
  */
 proto.android.emulation.control.EmulatorStatus.prototype.getVmconfig = function () {
-  return (/** @type{?proto.android.emulation.control.VmConfiguration} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.VmConfiguration, 4)
-  );
+  return /** @type{?proto.android.emulation.control.VmConfiguration} */jspb.Message.getWrapperField(this, proto.android.emulation.control.VmConfiguration, 4);
 };
 
 /**
@@ -6451,9 +6343,7 @@ proto.android.emulation.control.EmulatorStatus.prototype.hasVmconfig = function 
  * @return {?proto.android.emulation.control.EntryList}
  */
 proto.android.emulation.control.EmulatorStatus.prototype.getHardwareconfig = function () {
-  return (/** @type{?proto.android.emulation.control.EntryList} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.EntryList, 5)
-  );
+  return /** @type{?proto.android.emulation.control.EntryList} */jspb.Message.getWrapperField(this, proto.android.emulation.control.EntryList, 5);
 };
 
 /**
@@ -6635,8 +6525,7 @@ proto.android.emulation.control.AudioFormat.DeliveryMode = {
  * @return {number}
  */
 proto.android.emulation.control.AudioFormat.prototype.getSamplingrate = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -6652,8 +6541,7 @@ proto.android.emulation.control.AudioFormat.prototype.setSamplingrate = function
  * @return {!proto.android.emulation.control.AudioFormat.Channels}
  */
 proto.android.emulation.control.AudioFormat.prototype.getChannels = function () {
-  return (/** @type {!proto.android.emulation.control.AudioFormat.Channels} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {!proto.android.emulation.control.AudioFormat.Channels} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -6669,8 +6557,7 @@ proto.android.emulation.control.AudioFormat.prototype.setChannels = function (va
  * @return {!proto.android.emulation.control.AudioFormat.SampleFormat}
  */
 proto.android.emulation.control.AudioFormat.prototype.getFormat = function () {
-  return (/** @type {!proto.android.emulation.control.AudioFormat.SampleFormat} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {!proto.android.emulation.control.AudioFormat.SampleFormat} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -6686,8 +6573,7 @@ proto.android.emulation.control.AudioFormat.prototype.setFormat = function (valu
  * @return {!proto.android.emulation.control.AudioFormat.DeliveryMode}
  */
 proto.android.emulation.control.AudioFormat.prototype.getMode = function () {
-  return (/** @type {!proto.android.emulation.control.AudioFormat.DeliveryMode} */jspb.Message.getFieldWithDefault(this, 4, 0)
-  );
+  return /** @type {!proto.android.emulation.control.AudioFormat.DeliveryMode} */jspb.Message.getFieldWithDefault(this, 4, 0);
 };
 
 /**
@@ -6821,9 +6707,7 @@ proto.android.emulation.control.AudioPacket.serializeBinaryToWriter = function (
  * @return {?proto.android.emulation.control.AudioFormat}
  */
 proto.android.emulation.control.AudioPacket.prototype.getFormat = function () {
-  return (/** @type{?proto.android.emulation.control.AudioFormat} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.AudioFormat, 1)
-  );
+  return /** @type{?proto.android.emulation.control.AudioFormat} */jspb.Message.getWrapperField(this, proto.android.emulation.control.AudioFormat, 1);
 };
 
 /**
@@ -6855,8 +6739,7 @@ proto.android.emulation.control.AudioPacket.prototype.hasFormat = function () {
  * @return {number}
  */
 proto.android.emulation.control.AudioPacket.prototype.getTimestamp = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -6872,8 +6755,7 @@ proto.android.emulation.control.AudioPacket.prototype.setTimestamp = function (v
  * @return {!(string|Uint8Array)}
  */
 proto.android.emulation.control.AudioPacket.prototype.getAudio = function () {
-  return (/** @type {!(string|Uint8Array)} */jspb.Message.getFieldWithDefault(this, 3, "")
-  );
+  return /** @type {!(string|Uint8Array)} */jspb.Message.getFieldWithDefault(this, 3, "");
 };
 
 /**
@@ -6882,8 +6764,7 @@ proto.android.emulation.control.AudioPacket.prototype.getAudio = function () {
  * @return {string}
  */
 proto.android.emulation.control.AudioPacket.prototype.getAudio_asB64 = function () {
-  return (/** @type {string} */jspb.Message.bytesAsB64(this.getAudio())
-  );
+  return /** @type {string} */jspb.Message.bytesAsB64(this.getAudio());
 };
 
 /**
@@ -6894,8 +6775,7 @@ proto.android.emulation.control.AudioPacket.prototype.getAudio_asB64 = function 
  * @return {!Uint8Array}
  */
 proto.android.emulation.control.AudioPacket.prototype.getAudio_asU8 = function () {
-  return (/** @type {!Uint8Array} */jspb.Message.bytesAsU8(this.getAudio())
-  );
+  return /** @type {!Uint8Array} */jspb.Message.bytesAsU8(this.getAudio());
 };
 
 /**
@@ -7019,8 +6899,7 @@ proto.android.emulation.control.SmsMessage.serializeBinaryToWriter = function (m
  * @return {string}
  */
 proto.android.emulation.control.SmsMessage.prototype.getSrcaddress = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "");
 };
 
 /**
@@ -7036,8 +6915,7 @@ proto.android.emulation.control.SmsMessage.prototype.setSrcaddress = function (v
  * @return {string}
  */
 proto.android.emulation.control.SmsMessage.prototype.getText = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 2, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 2, "");
 };
 
 /**
@@ -7200,8 +7078,7 @@ proto.android.emulation.control.DisplayConfiguration.DisplayFlags = {
  * @return {number}
  */
 proto.android.emulation.control.DisplayConfiguration.prototype.getWidth = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -7217,8 +7094,7 @@ proto.android.emulation.control.DisplayConfiguration.prototype.setWidth = functi
  * @return {number}
  */
 proto.android.emulation.control.DisplayConfiguration.prototype.getHeight = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -7234,8 +7110,7 @@ proto.android.emulation.control.DisplayConfiguration.prototype.setHeight = funct
  * @return {number}
  */
 proto.android.emulation.control.DisplayConfiguration.prototype.getDpi = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -7251,8 +7126,7 @@ proto.android.emulation.control.DisplayConfiguration.prototype.setDpi = function
  * @return {number}
  */
 proto.android.emulation.control.DisplayConfiguration.prototype.getFlags = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 4, 0);
 };
 
 /**
@@ -7268,8 +7142,7 @@ proto.android.emulation.control.DisplayConfiguration.prototype.setFlags = functi
  * @return {number}
  */
 proto.android.emulation.control.DisplayConfiguration.prototype.getDisplay = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 5, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 5, 0);
 };
 
 /**
@@ -7410,9 +7283,7 @@ proto.android.emulation.control.DisplayConfigurations.serializeBinaryToWriter = 
  * @return {!Array<!proto.android.emulation.control.DisplayConfiguration>}
  */
 proto.android.emulation.control.DisplayConfigurations.prototype.getDisplaysList = function () {
-  return (/** @type{!Array<!proto.android.emulation.control.DisplayConfiguration>} */
-    jspb.Message.getRepeatedWrapperField(this, proto.android.emulation.control.DisplayConfiguration, 1)
-  );
+  return /** @type{!Array<!proto.android.emulation.control.DisplayConfiguration>} */jspb.Message.getRepeatedWrapperField(this, proto.android.emulation.control.DisplayConfiguration, 1);
 };
 
 /**
@@ -7445,8 +7316,7 @@ proto.android.emulation.control.DisplayConfigurations.prototype.clearDisplaysLis
  * @return {number}
  */
 proto.android.emulation.control.DisplayConfigurations.prototype.getUserconfigurable = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -7462,8 +7332,7 @@ proto.android.emulation.control.DisplayConfigurations.prototype.setUserconfigura
  * @return {number}
  */
 proto.android.emulation.control.DisplayConfigurations.prototype.getMaxdisplays = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -7497,8 +7366,7 @@ proto.android.emulation.control.Notification.TypeCase = {
  * @return {proto.android.emulation.control.Notification.TypeCase}
  */
 proto.android.emulation.control.Notification.prototype.getTypeCase = function () {
-  return (/** @type {proto.android.emulation.control.Notification.TypeCase} */jspb.Message.computeOneofCase(this, proto.android.emulation.control.Notification.oneofGroups_[0])
-  );
+  return /** @type {proto.android.emulation.control.Notification.TypeCase} */jspb.Message.computeOneofCase(this, proto.android.emulation.control.Notification.oneofGroups_[0]);
 };
 if (jspb.Message.GENERATE_TO_OBJECT) {
   /**
@@ -7634,8 +7502,7 @@ proto.android.emulation.control.Notification.EventType = {
  * @return {!proto.android.emulation.control.Notification.EventType}
  */
 proto.android.emulation.control.Notification.prototype.getEvent = function () {
-  return (/** @type {!proto.android.emulation.control.Notification.EventType} */jspb.Message.getFieldWithDefault(this, 1, 0)
-  );
+  return /** @type {!proto.android.emulation.control.Notification.EventType} */jspb.Message.getFieldWithDefault(this, 1, 0);
 };
 
 /**
@@ -7651,9 +7518,7 @@ proto.android.emulation.control.Notification.prototype.setEvent = function (valu
  * @return {?proto.android.emulation.control.CameraNotification}
  */
 proto.android.emulation.control.Notification.prototype.getCameranotification = function () {
-  return (/** @type{?proto.android.emulation.control.CameraNotification} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.CameraNotification, 2)
-  );
+  return /** @type{?proto.android.emulation.control.CameraNotification} */jspb.Message.getWrapperField(this, proto.android.emulation.control.CameraNotification, 2);
 };
 
 /**
@@ -7685,9 +7550,7 @@ proto.android.emulation.control.Notification.prototype.hasCameranotification = f
  * @return {?proto.android.emulation.control.DisplayConfigurationsChangedNotification}
  */
 proto.android.emulation.control.Notification.prototype.getDisplayconfigurationschangednotification = function () {
-  return (/** @type{?proto.android.emulation.control.DisplayConfigurationsChangedNotification} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.DisplayConfigurationsChangedNotification, 3)
-  );
+  return /** @type{?proto.android.emulation.control.DisplayConfigurationsChangedNotification} */jspb.Message.getWrapperField(this, proto.android.emulation.control.DisplayConfigurationsChangedNotification, 3);
 };
 
 /**
@@ -7827,8 +7690,7 @@ proto.android.emulation.control.CameraNotification.serializeBinaryToWriter = fun
  * @return {boolean}
  */
 proto.android.emulation.control.CameraNotification.prototype.getActive = function () {
-  return (/** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 1, false)
-  );
+  return /** @type {boolean} */jspb.Message.getBooleanFieldWithDefault(this, 1, false);
 };
 
 /**
@@ -7844,8 +7706,7 @@ proto.android.emulation.control.CameraNotification.prototype.setActive = functio
  * @return {number}
  */
 proto.android.emulation.control.CameraNotification.prototype.getDisplay = function () {
-  return (/** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0)
-  );
+  return /** @type {number} */jspb.Message.getFieldWithDefault(this, 2, 0);
 };
 
 /**
@@ -7961,9 +7822,7 @@ proto.android.emulation.control.DisplayConfigurationsChangedNotification.seriali
  * @return {?proto.android.emulation.control.DisplayConfigurations}
  */
 proto.android.emulation.control.DisplayConfigurationsChangedNotification.prototype.getDisplayconfigurations = function () {
-  return (/** @type{?proto.android.emulation.control.DisplayConfigurations} */
-    jspb.Message.getWrapperField(this, proto.android.emulation.control.DisplayConfigurations, 1)
-  );
+  return /** @type{?proto.android.emulation.control.DisplayConfigurations} */jspb.Message.getWrapperField(this, proto.android.emulation.control.DisplayConfigurations, 1);
 };
 
 /**
@@ -8112,8 +7971,7 @@ proto.android.emulation.control.RotationRadian.serializeBinaryToWriter = functio
  * @return {number}
  */
 proto.android.emulation.control.RotationRadian.prototype.getX = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 1, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 1, 0.0);
 };
 
 /**
@@ -8129,8 +7987,7 @@ proto.android.emulation.control.RotationRadian.prototype.setX = function (value)
  * @return {number}
  */
 proto.android.emulation.control.RotationRadian.prototype.getY = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0);
 };
 
 /**
@@ -8146,8 +8003,7 @@ proto.android.emulation.control.RotationRadian.prototype.setY = function (value)
  * @return {number}
  */
 proto.android.emulation.control.RotationRadian.prototype.getZ = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0);
 };
 
 /**
@@ -8280,8 +8136,7 @@ proto.android.emulation.control.Velocity.serializeBinaryToWriter = function (mes
  * @return {number}
  */
 proto.android.emulation.control.Velocity.prototype.getX = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 1, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 1, 0.0);
 };
 
 /**
@@ -8297,8 +8152,7 @@ proto.android.emulation.control.Velocity.prototype.setX = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.Velocity.prototype.getY = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0);
 };
 
 /**
@@ -8314,8 +8168,7 @@ proto.android.emulation.control.Velocity.prototype.setY = function (value) {
  * @return {number}
  */
 proto.android.emulation.control.Velocity.prototype.getZ = function () {
-  return (/** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0)
-  );
+  return /** @type {number} */jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0);
 };
 
 /**
@@ -8443,8 +8296,7 @@ proto.android.emulation.control.Posture.PostureValue = {
  * @return {!proto.android.emulation.control.Posture.PostureValue}
  */
 proto.android.emulation.control.Posture.prototype.getValue = function () {
-  return (/** @type {!proto.android.emulation.control.Posture.PostureValue} */jspb.Message.getFieldWithDefault(this, 3, 0)
-  );
+  return /** @type {!proto.android.emulation.control.Posture.PostureValue} */jspb.Message.getFieldWithDefault(this, 3, 0);
 };
 
 /**
@@ -8559,8 +8411,7 @@ proto.android.emulation.control.PhoneNumber.serializeBinaryToWriter = function (
  * @return {string}
  */
 proto.android.emulation.control.PhoneNumber.prototype.getNumber = function () {
-  return (/** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "")
-  );
+  return /** @type {string} */jspb.Message.getFieldWithDefault(this, 1, "");
 };
 
 /**

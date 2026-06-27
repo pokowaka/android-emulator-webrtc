@@ -127,10 +127,10 @@ describe("The event handler", () => {
   });
 
   describe("scaleCoordinates aspect ratio scaling & bounds", () => {
-    let eventHandlerInstance;
+    let hocRef;
 
     beforeEach(async () => {
-      const hocRef = React.createRef();
+      hocRef = React.createRef();
       await act(async () => {
         render(<TestView ref={hocRef} statusUrl="http://foo/status" jsep={mockJsep} />);
       });
@@ -138,17 +138,17 @@ describe("The event handler", () => {
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 20));
       });
-      eventHandlerInstance = hocRef.current;
     });
 
     test("1:1 Perfect Match (no letterbox/pillarbox)", async () => {
       await act(async () => {
-        eventHandlerInstance.setState({ deviceWidth: 1000, deviceHeight: 1000 });
+        hocRef.current.setDeviceWidth(1000);
+        hocRef.current.setDeviceHeight(1000);
       });
-      eventHandlerInstance.handler.current = { clientWidth: 500, clientHeight: 500 };
+      hocRef.current.handlerRef.current = { clientWidth: 500, clientHeight: 500 };
 
       // Normal scaling: 500x500 -> 1000x1000 (factor of 2)
-      expect(eventHandlerInstance.scaleCoordinates(250, 250)).toEqual({
+      expect(hocRef.current.scaleCoordinates(250, 250)).toEqual({
         x: 500,
         y: 500,
         scaleX: 2,
@@ -158,17 +158,18 @@ describe("The event handler", () => {
 
     test("Pillarboxed (wide container: 1000x500 container, 1000x1000 device)", async () => {
       await act(async () => {
-        eventHandlerInstance.setState({ deviceWidth: 1000, deviceHeight: 1000 });
+        hocRef.current.setDeviceWidth(1000);
+        hocRef.current.setDeviceHeight(1000);
       });
       // Container is twice as wide as height. But device is 1:1.
       // Rendered area should be centered: 500x500 in the middle of 1000x500 container.
       // offsetX = (1000 - 500) / 2 = 250.
-      eventHandlerInstance.handler.current = { clientWidth: 1000, clientHeight: 500 };
+      hocRef.current.handlerRef.current = { clientWidth: 1000, clientHeight: 500 };
 
       // Clicking at the exact center of the container (500, 250)
       // adjustedXp = 500 - 250 = 250. adjustedYp = 250 - 0 = 250.
       // Rendered width/height = 500x500, so scale is 2.
-      expect(eventHandlerInstance.scaleCoordinates(500, 250)).toEqual({
+      expect(hocRef.current.scaleCoordinates(500, 250)).toEqual({
         x: 500,
         y: 500,
         scaleX: 2,
@@ -176,7 +177,7 @@ describe("The event handler", () => {
       });
 
       // Click in the left pillar box (offsetX is 250, so clicking at 100 is out of bounds)
-      expect(eventHandlerInstance.scaleCoordinates(100, 250)).toEqual({
+      expect(hocRef.current.scaleCoordinates(100, 250)).toEqual({
         x: -1,
         y: -1,
         scaleX: 2,
@@ -186,16 +187,17 @@ describe("The event handler", () => {
 
     test("Letterboxed (tall container: 500x1000 container, 1000x1000 device)", async () => {
       await act(async () => {
-        eventHandlerInstance.setState({ deviceWidth: 1000, deviceHeight: 1000 });
+        hocRef.current.setDeviceWidth(1000);
+        hocRef.current.setDeviceHeight(1000);
       });
       // Container is twice as tall as width. But device is 1:1.
       // Rendered area should be centered: 500x500 in the middle of 500x1000 container.
       // offsetY = (1000 - 500) / 2 = 250.
-      eventHandlerInstance.handler.current = { clientWidth: 500, clientHeight: 1000 };
+      hocRef.current.handlerRef.current = { clientWidth: 500, clientHeight: 1000 };
 
       // Clicking at the exact center of the container (250, 500)
       // adjustedXp = 250 - 0 = 250. adjustedYp = 500 - 250 = 250.
-      expect(eventHandlerInstance.scaleCoordinates(250, 500)).toEqual({
+      expect(hocRef.current.scaleCoordinates(250, 500)).toEqual({
         x: 500,
         y: 500,
         scaleX: 2,
@@ -203,12 +205,27 @@ describe("The event handler", () => {
       });
 
       // Click in the top letter box (offsetY is 250, so clicking at 100 is out of bounds)
-      expect(eventHandlerInstance.scaleCoordinates(250, 100)).toEqual({
+      expect(hocRef.current.scaleCoordinates(250, 100)).toEqual({
         x: -1,
         y: -1,
         scaleX: 2,
         scaleY: 2,
       });
+    });
+  });
+
+  describe("Out of bounds event ignoring", () => {
+    test("Does not forward out of bounds mouse events", () => {
+      // Container is 200x200 (set in beforeEach), device is 200x200.
+      // Click at -5, -5 (out of bounds)
+      fireEvent(fakeScreen, fakeMouseEvent("mousedown", -5, -5));
+      expect(mockJsep.send).not.toHaveBeenCalled();
+    });
+
+    test("Does not forward out of bounds touch events", () => {
+      // Touch at 250, 250 (out of bounds for 200x200 container)
+      fireEvent(fakeScreen, fakeTouchEvent("touchstart", 250, 250, 1));
+      expect(mockJsep.send).not.toHaveBeenCalled();
     });
   });
 });

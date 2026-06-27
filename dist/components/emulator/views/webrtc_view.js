@@ -9,6 +9,7 @@ exports["default"] = void 0;
 var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 var _propTypes = _interopRequireDefault(require("prop-types"));
 var _react = _interopRequireWildcard(require("react"));
+var _logger = _interopRequireDefault(require("../net/logger"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 /*
@@ -27,13 +28,33 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
  * limitations under the License.
  */
 
+/**
+ * A React component that renders the WebRTC video stream of the emulator.
+ * Handles establishing the stream via the JSEP protocol driver and managing
+ * local playback (including handling autoplay constraints).
+ *
+ * @param {Object} props Component properties.
+ * @param {Object} props.jsep The JSEP protocol driver instance.
+ * @param {function(string): void} [props.onStateChange] Callback for connection state changes ("connecting", "connected", "disconnected").
+ * @param {function(boolean): void} [props.onAudioStateChange] Callback when audio track status changes.
+ * @param {boolean} [props.muted=true] Whether the audio should be muted.
+ * @param {number} [props.volume=1.0] Audio volume (between 0.0 and 1.0).
+ * @param {function(Error): void} props.onError Callback invoked on signaling or playback errors.
+ * @param {number} [props.width] Component width.
+ * @param {number} [props.height] Component height.
+ */
 var EmulatorWebrtcView = function EmulatorWebrtcView(_ref) {
   var jsep = _ref.jsep,
     onStateChange = _ref.onStateChange,
     onAudioStateChange = _ref.onAudioStateChange,
-    muted = _ref.muted,
-    volume = _ref.volume,
-    onError = _ref.onError,
+    _ref$muted = _ref.muted,
+    muted = _ref$muted === void 0 ? true : _ref$muted,
+    _ref$volume = _ref.volume,
+    volume = _ref$volume === void 0 ? 1.0 : _ref$volume,
+    _ref$onError = _ref.onError,
+    onError = _ref$onError === void 0 ? function (e) {
+      return _logger["default"].error("WebRTC error: " + e);
+    } : _ref$onError,
     width = _ref.width,
     height = _ref.height;
   var _useState = (0, _react.useState)(false),
@@ -83,7 +104,7 @@ var EmulatorWebrtcView = function EmulatorWebrtcView(_ref) {
     var possiblePromise = video.play();
     if (possiblePromise) {
       possiblePromise.then(function (_) {
-        console.debug("Automatic playback started!");
+        _logger["default"].debug("Automatic playback started!");
       })["catch"](function (error) {
         // Notify listeners that we cannot start.
         onError(error);
@@ -131,12 +152,4 @@ EmulatorWebrtcView.propTypes = {
   width: _propTypes["default"].number,
   height: _propTypes["default"].number
 };
-EmulatorWebrtcView.defaultProps = {
-  muted: true,
-  volume: 1.0,
-  onError: function onError(e) {
-    return console.error("WebRTC error: " + e);
-  }
-};
-var _default = EmulatorWebrtcView;
-exports["default"] = _default;
+var _default = exports["default"] = EmulatorWebrtcView;

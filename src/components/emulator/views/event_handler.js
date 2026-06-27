@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import Proto from "../../../proto/emulator_controller_pb";
 import EmulatorStatus from "../net/emulator_status";
 import logger from "../net/logger";
@@ -18,7 +18,7 @@ const DEFAULT_HEIGHT = 2424;
  * You usually want to wrap a EmulatorRtcview, or EmulatorPngView in it.
  */
 export default function withMouseKeyHandler(WrappedComponent) {
-  const MouseKeyHandler = (props) => {
+  const MouseKeyHandler = forwardRef((props, ref) => {
     const { statusUrl, auth, jsep, width, height } = props;
 
     const [deviceWidth, setDeviceWidth] = useState(DEFAULT_WIDTH);
@@ -36,6 +36,13 @@ export default function withMouseKeyHandler(WrappedComponent) {
     if (!statusRef.current) {
       statusRef.current = new EmulatorStatus(statusUrl, auth);
     }
+
+    useImperativeHandle(ref, () => ({
+      scaleCoordinates,
+      setDeviceWidth,
+      setDeviceHeight,
+      handlerRef,
+    }));
 
     useEffect(() => {
       statusRef.current.updateStatus((state) => {
@@ -112,8 +119,11 @@ export default function withMouseKeyHandler(WrappedComponent) {
 
     const sendMouseCoordinates = (currentMouse) => {
       const { mouseDown, mouseButton, xp, yp } = currentMouse;
-      const request = new Proto.MouseEvent();
       const { x, y } = scaleCoordinates(xp, yp);
+      if (x < 0 || y < 0) {
+        return;
+      }
+      const request = new Proto.MouseEvent();
       request.setX(x);
       request.setY(y);
       request.setButtons(mouseDown ? mouseButton : 0);
@@ -194,12 +204,19 @@ export default function withMouseKeyHandler(WrappedComponent) {
     const setTouchCoordinates = (type, touches, minForce, maxForce) => {
       // We need to calculate the offset of the touch events.
       const rect = handlerRef.current.getBoundingClientRect();
-      const touchesToSend = Object.keys(touches).map((index) => {
-        const touch = touches[index];
+      const touchesToSend = [];
+
+      for (let i = 0; i < touches.length; i++) {
+        const touch = touches[i];
         const { clientX, clientY, identifier, force, radiusX, radiusY } = touch;
         const offsetX = clientX - rect.left;
         const offsetY = clientY - rect.top;
         const { x, y, scaleX, scaleY } = scaleCoordinates(offsetX, offsetY);
+
+        if (x < 0 || y < 0) {
+          continue;
+        }
+
         const scaledRadiusX = 2 * radiusX * scaleX;
         const scaledRadiusY = 2 * radiusY * scaleY;
 
@@ -218,8 +235,12 @@ export default function withMouseKeyHandler(WrappedComponent) {
         protoTouch.setTouchMajor(Math.max(scaledRadiusX, scaledRadiusY) | 0);
         protoTouch.setTouchMinor(Math.min(scaledRadiusX, scaledRadiusY) | 0);
 
-        return protoTouch;
-      });
+        touchesToSend.push(protoTouch);
+      }
+
+      if (touchesToSend.length === 0) {
+        return;
+      }
 
       // Make the grpc call.
       const requestTouchEvent = new Proto.TouchEvent();
@@ -271,7 +292,7 @@ export default function withMouseKeyHandler(WrappedComponent) {
         <WrappedComponent {...props} />
       </div>
     );
-  };
+  });
 
   MouseKeyHandler.propTypes = {
     /** The REST endpoint to retrieve status */

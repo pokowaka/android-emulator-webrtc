@@ -16,12 +16,5 @@ Object.defineProperty(exports, "EmulatorStatus", {
     return _emulator_status["default"];
   }
 });
-Object.defineProperty(exports, "Logcat", {
-  enumerable: true,
-  get: function get() {
-    return _logcat["default"];
-  }
-});
 var _emulator = _interopRequireDefault(require("./components/emulator/emulator"));
-var _logcat = _interopRequireDefault(require("./components/emulator/net/logcat"));
 var _emulator_status = _interopRequireDefault(require("./components/emulator/net/emulator_status"));

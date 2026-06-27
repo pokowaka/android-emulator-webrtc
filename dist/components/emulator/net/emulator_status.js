@@ -8,6 +8,7 @@ exports["default"] = void 0;
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+var _logger = _interopRequireDefault(require("./logger"));
 /*
  * Copyright 2020 The Android Open Source Project
  *
@@ -24,8 +25,9 @@ var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/de
  * limitations under the License.
  */
 /**
- * Gets the status of the emulator, parsing the hardware config into something
- * easy to digest.
+ * Utility class to query and manage the emulator's status by communicating
+ * with its REST configuration endpoint. It parses the hardware configuration
+ * and caches the status.
  *
  * @export
  * @class EmulatorStatus
@@ -35,24 +37,26 @@ var EmulatorStatus = /*#__PURE__*/(0, _createClass2["default"])(
  * Creates an EmulatorStatus object that can retrieve the status of the running emulator.
  *
  * @param {string} statusUrl The REST endpoint to retrieve status.
- * @param {object} auth The authentication service to use, or null for no authentication.
+ * @param {Object} [auth] The authentication service to use, or null for no authentication.
+ * @param {function} [auth.authHeader] Function returning authorization headers.
  */
 function EmulatorStatus(statusUrl, auth) {
   var _this = this;
   (0, _classCallCheck2["default"])(this, EmulatorStatus);
   /**
-   * Gets the cached status.
+   * Gets the cached status object.
    *
+   * @returns {Object|null} The cached emulator status or null if not yet loaded.
    * @memberof EmulatorStatus
    */
   (0, _defineProperty2["default"])(this, "getStatus", function () {
     return _this.status;
   });
   /**
-   * Retrieves the current status from the emulator.
+   * Retrieves the current status from the emulator REST endpoint.
    *
-   * @param  {Callback} fnNotify when the status is available, returns the retrieved status.
-   * @param  {boolean} cache True if the cache can be used.
+   * @param {function(Object): void} fnNotify Callback invoked when the status is retrieved. Receives the status object.
+   * @param {boolean} [cache=false] If true, uses the cached status if available instead of fetching.
    * @memberof EmulatorStatus
    */
   (0, _defineProperty2["default"])(this, "updateStatus", function (fnNotify, cache) {
@@ -80,12 +84,11 @@ function EmulatorStatus(statusUrl, auth) {
       _this.status = data;
       fnNotify(_this.status);
     })["catch"](function (err) {
-      console.error("Failed to get emulator status:", err);
+      _logger["default"].error("Failed to get emulator status:", err);
     });
   });
   this.statusUrl = statusUrl;
   this.auth = auth;
   this.status = null;
 });
-var _default = EmulatorStatus;
-exports["default"] = _default;
+var _default = exports["default"] = EmulatorStatus;

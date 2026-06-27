@@ -12,6 +12,7 @@ var _react = _interopRequireWildcard(require("react"));
 var _webrtc_view = _interopRequireDefault(require("./views/webrtc_view.js"));
 var _event_handler = _interopRequireDefault(require("./views/event_handler"));
 var _ws_jsep_protocol_driver = _interopRequireDefault(require("./net/ws_jsep_protocol_driver"));
+var _logger = _interopRequireDefault(require("./net/logger"));
 var _emulator_controller_pb = _interopRequireDefault(require("../../proto/emulator_controller_pb"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -31,8 +32,17 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
  * limitations under the License.
  */
 
-console.log("Imported WsJsepProtocol class:", _ws_jsep_protocol_driver["default"]);
 var RtcView = (0, _event_handler["default"])(_webrtc_view["default"]);
+
+/**
+ * Resolves the given URI into the required REST and WebSocket endpoints for the emulator.
+ *
+ * @param {string} uri The base URI of the emulator gateway.
+ * @returns {Object} An object containing the resolved URLs:
+ *                   - status: The REST endpoint for retrieving emulator status.
+ *                   - gps: The REST endpoint for setting GPS coordinates.
+ *                   - jsep: The WebSocket endpoint for WebRTC JSEP signaling.
+ */
 var getUrls = function getUrls(uri) {
   var restBase = uri;
   if (!/^https?:\/\//i.test(uri)) {
@@ -95,18 +105,18 @@ var Emulator = /*#__PURE__*/(0, _react.forwardRef)(function (_ref, ref) {
     volume = _ref$volume === void 0 ? 1.0 : _ref$volume,
     _ref$onStateChange = _ref.onStateChange,
     onStateChange = _ref$onStateChange === void 0 ? function (s) {
-      console.debug("emulator state: " + s);
+      _logger["default"].debug("emulator state: " + s);
     } : _ref$onStateChange,
     _ref$onAudioStateChan = _ref.onAudioStateChange,
     onAudioStateChange = _ref$onAudioStateChan === void 0 ? function (s) {
-      console.debug("emulator audio: " + s);
+      _logger["default"].debug("emulator audio: " + s);
     } : _ref$onAudioStateChan,
     width = _ref.width,
     height = _ref.height,
     gps = _ref.gps,
     _ref$onError = _ref.onError,
     onError = _ref$onError === void 0 ? function (e) {
-      console.error(e);
+      _logger["default"].error(e);
     } : _ref$onError;
   var _useState = (0, _react.useState)(false),
     _useState2 = (0, _slicedToArray2["default"])(_useState, 2),
@@ -126,7 +136,7 @@ var Emulator = /*#__PURE__*/(0, _react.forwardRef)(function (_ref, ref) {
         onErrorRef.current(err);
       }
     });
-    console.log("Created JSEP:", jsep.current);
+    _logger["default"].info("Created JSEP:", jsep.current);
   }
   (0, _react.useEffect)(function () {
     if (typeof gps === "undefined") {
@@ -174,7 +184,7 @@ var Emulator = /*#__PURE__*/(0, _react.forwardRef)(function (_ref, ref) {
     setAudio(s);
     onAudioStateChange(s);
   };
-  console.log("render ".concat(width, "x").concat(height));
+  _logger["default"].debug("render ".concat(width, "x").concat(height));
   return /*#__PURE__*/_react["default"].createElement(RtcView, {
     ref: viewRef,
     width: width,
@@ -211,5 +221,4 @@ Emulator.propTypes = {
   /** Callback that will be invoked in case of errors. */
   onError: _propTypes["default"].func
 };
-var _default = Emulator;
-exports["default"] = _default;
+var _default = exports["default"] = Emulator;

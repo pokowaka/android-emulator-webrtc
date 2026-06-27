@@ -122,6 +122,12 @@ const EmulatorWebrtcView = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = volume;
+    }
+  }, [volume]);
+
   return (
     <video
       ref={videoRef}
@@ -133,7 +139,6 @@ const EmulatorWebrtcView = ({
         objectFit: "contain",
         objectPosition: "center",
       }}
-      volume={volume}
       muted={muted}
       onContextMenu={onContextMenu}
       onCanPlay={onCanPlay}
