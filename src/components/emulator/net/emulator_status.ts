@@ -43,8 +43,8 @@ class EmulatorStatus {
   /**
    * Creates an EmulatorStatus object that can retrieve the status of the running emulator.
    *
-   * @param {string} statusUrl The REST endpoint to retrieve status.
-   * @param {Object} [auth] The authentication service to use, or null for no authentication.
+   * @param statusUrl The REST endpoint to retrieve status.
+   * @param auth The authentication service to use, or null for no authentication.
    */
   constructor(statusUrl: string, auth?: AuthService | null) {
     this.statusUrl = statusUrl;
@@ -55,7 +55,7 @@ class EmulatorStatus {
   /**
    * Gets the cached status object.
    *
-   * @returns {Object|null} The cached emulator status or null if not yet loaded.
+   * @returns The cached emulator status or null if not yet loaded.
    * @memberof EmulatorStatus
    */
   getStatus = (): EmulatorStatusData | null => {
@@ -65,8 +65,8 @@ class EmulatorStatus {
   /**
    * Retrieves the current status from the emulator REST endpoint.
    *
-   * @param {function(Object): void} fnNotify Callback invoked when the status is retrieved. Receives the status object.
-   * @param {boolean} [cache=false] If true, uses the cached status if available instead of fetching.
+   * @param fnNotify Callback invoked when the status is retrieved. Receives the status object.
+   * @param cache If true, uses the cached status if available instead of fetching.
    * @memberof EmulatorStatus
    */
   updateStatus = (fnNotify: (status: EmulatorStatusData) => void, cache?: boolean) => {
