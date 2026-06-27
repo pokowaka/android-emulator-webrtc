@@ -38,6 +38,14 @@ jobs:
       - name: Install Root Dependencies
         run: npm ci
 
+      - name: Setup protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Protobuf Files
+        run: make protoc
+
       - name: Install Example Dependencies
         run: |
           cd example
