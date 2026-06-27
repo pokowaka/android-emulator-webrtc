@@ -137,6 +137,12 @@ const EmulatorWebrtcView: React.FC<EmulatorWebrtcViewProps> = ({
     }
   }, [volume]);
 
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = muted;
+    }
+  }, [muted]);
+
   return (
     <video
       ref={videoRef}
@@ -148,7 +154,6 @@ const EmulatorWebrtcView: React.FC<EmulatorWebrtcViewProps> = ({
         objectFit: "contain",
         objectPosition: "center",
       }}
-      muted={muted}
       onContextMenu={onContextMenu}
       onCanPlay={onCanPlay}
     />

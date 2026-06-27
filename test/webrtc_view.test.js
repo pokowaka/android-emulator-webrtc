@@ -45,6 +45,20 @@ describe("EmulatorWebrtcView", () => {
     expect(videoElement.volume).toBe(0.8);
   });
 
+  test("Applies muted updates to the video DOM element directly", () => {
+    const { container, rerender } = render(
+      <EmulatorWebrtcView jsep={mockJsep} muted={true} />
+    );
+
+    const videoElement = container.querySelector("video");
+    expect(videoElement).toBeInTheDocument();
+    expect(videoElement.muted).toBe(true);
+
+    // Update muted prop
+    rerender(<EmulatorWebrtcView jsep={mockJsep} muted={false} />);
+    expect(videoElement.muted).toBe(false);
+  });
+
   test("Does not add duplicate tracks to the media stream", () => {
     // Mock MediaStream and MediaStreamTrack for the JSDOM environment
     const mockTracks = [];
