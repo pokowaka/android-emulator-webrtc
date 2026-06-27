@@ -35,6 +35,14 @@ export interface EmulatorController {
   sendTouch?(msg: any): void;
 }
 
+export interface JsepSignal {
+  start?: RTCConfiguration;
+  type?: "offer" | "answer";
+  sdp?: RTCSessionDescriptionInit;
+  candidate?: RTCIceCandidateInit | string;
+  bye?: boolean;
+}
+
 /**
  * A JSEP protocol driver that uses WebSockets for signaling.
  *
@@ -55,10 +63,10 @@ export default class WsJsepProtocol {
   peerConnection: RTCPeerConnection | null;
   ws: WebSocket | null;
 
-  pendingCandidates: any[];
+  pendingCandidates: (RTCIceCandidateInit | string)[];
   remoteDescriptionSet: boolean;
 
-  signalQueue: any[];
+  signalQueue: JsepSignal[];
   isProcessingSignal: boolean;
 
   onConnected: ((track: MediaStreamTrack) => void) | null;
@@ -246,7 +254,7 @@ export default class WsJsepProtocol {
    * @private
    * @param signal The JSEP signaling message.
    */
-  _handleSignal = async (signal: any) => {
+  _handleSignal = async (signal: JsepSignal) => {
     logger.debug("JSEP << [Received from Server]:", JSON.stringify(signal, null, 2));
     
     try {
@@ -415,7 +423,7 @@ export default class WsJsepProtocol {
    * @private
    * @param candidate The ICE candidate object or string.
    */
-  _addIceCandidate = (candidate: any) => {
+  _addIceCandidate = (candidate: RTCIceCandidateInit | string) => {
     try {
       const candidateInit = typeof candidate === 'string'
         ? { candidate: candidate, sdpMid: "0", sdpMLineIndex: 0 }
@@ -432,7 +440,7 @@ export default class WsJsepProtocol {
    * @private
    * @param candidate The remote ICE candidate.
    */
-  _handleCandidate = (candidate: any) => {
+  _handleCandidate = (candidate: RTCIceCandidateInit | string) => {
     if (!this.peerConnection) return;
     if (!this.remoteDescriptionSet) {
       logger.debug("Queueing ICE candidate until remote description is set:", candidate);
@@ -457,7 +465,7 @@ export default class WsJsepProtocol {
    * @private
    * @param jsonObject The JSON payload.
    */
-  _sendJsep = (jsonObject: any) => {
+  _sendJsep = (jsonObject: JsepSignal) => {
     logger.debug("JSEP >> [Sending to Server]:", JSON.stringify(jsonObject, null, 2));
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(jsonObject));
