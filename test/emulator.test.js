@@ -170,6 +170,35 @@ describe("The emulator", () => {
     });
   });
 
+  test("Does not re-send GPS coordinates on unrelated rerenders", async () => {
+    const { rerender } = await renderEmulator(
+      <Emulator
+        uri="localhost:8080"
+        width={300}
+        height={300}
+        gps={{ latitude: 47.6062, longitude: 122.3321 }}
+      />
+    );
+
+    // Clear fetch mocks
+    global.fetch.mockClear();
+
+    // Rerender with the same GPS coordinates but different width/height
+    rerender(
+      <Emulator
+        uri="localhost:8080"
+        width={400}
+        height={400}
+        gps={{ latitude: 47.6062, longitude: 122.3321 }}
+      />
+    );
+
+    // Wait a brief moment to ensure no async calls were triggered
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const gpsCalls = global.fetch.mock.calls.filter(call => call[0] === "http://localhost:8080/api/v1/emulator/gps");
+    expect(gpsCalls).toHaveLength(0);
+  });
+
   test("Cleans up JsepProtocol on unmount", async () => {
     const { unmount } = await renderEmulator(
       <Emulator uri="localhost:8080" width={300} height={300} />

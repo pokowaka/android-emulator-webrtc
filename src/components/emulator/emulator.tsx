@@ -19,6 +19,7 @@ import React, {
   useRef,
   useImperativeHandle,
   forwardRef,
+  useMemo,
 } from "react";
 import EmulatorWebrtcView from "./views/webrtc_view";
 import withMouseKeyHandler from "./views/event_handler";
@@ -144,7 +145,7 @@ const Emulator = forwardRef<EmulatorRef, EmulatorProps>(
       onErrorRef.current = onError;
     }, [onError]);
 
-    const urls = getUrls(uri);
+    const urls = useMemo(() => getUrls(uri), [uri]);
 
     if (!jsep.current) {
       jsep.current = new WsJsepProtocol(urls.jsep, null, {
@@ -184,7 +185,15 @@ const Emulator = forwardRef<EmulatorRef, EmulatorProps>(
       }).catch(err => {
         if (onError) onError(err);
       });
-    }, [gps, uri, auth]);
+    }, [
+      gps?.latitude,
+      gps?.longitude,
+      gps?.altitude,
+      gps?.heading,
+      gps?.speed,
+      urls.gps,
+      auth
+    ]);
 
     useEffect(() => {
       return () => {
