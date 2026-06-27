@@ -63,11 +63,7 @@ export default defineConfig(({ command }) => {
       customTerminalLoggingPlugin(),
       terminal({ console: command === 'serve' ? 'terminal' : undefined }),
     ],
-    esbuild: {
-      loader: 'jsx',
-      include: /.*\.[jt]sx?$/,
-      exclude: [],
-    },
+
     optimizeDeps: {
       include: [
         'google-protobuf/google/protobuf/empty_pb.js'
