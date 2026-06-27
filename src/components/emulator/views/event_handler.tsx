@@ -182,11 +182,16 @@ export default function withMouseKeyHandler<P extends object>(
       jsep.send("keyboard", request);
     }, [jsep]);
 
-    // Properly handle the mouse events.
-    const handleMouseDown = (e: React.MouseEvent) => {
+    const getRelativeCoords = (e: React.MouseEvent) => {
       const rect = handlerRef.current ? handlerRef.current.getBoundingClientRect() : null;
       const xp = rect && rect.width > 0 ? e.clientX - rect.left : e.nativeEvent.offsetX || 0;
       const yp = rect && rect.height > 0 ? e.clientY - rect.top : e.nativeEvent.offsetY || 0;
+      return { xp, yp };
+    };
+
+    // Properly handle the mouse events.
+    const handleMouseDown = (e: React.MouseEvent) => {
+      const { xp, yp } = getRelativeCoords(e);
       const newMouse = {
         xp,
         yp,
@@ -200,9 +205,7 @@ export default function withMouseKeyHandler<P extends object>(
     };
 
     const handleMouseUp = (e: React.MouseEvent) => {
-      const rect = handlerRef.current ? handlerRef.current.getBoundingClientRect() : null;
-      const xp = rect && rect.width > 0 ? e.clientX - rect.left : e.nativeEvent.offsetX || 0;
-      const yp = rect && rect.height > 0 ? e.clientY - rect.top : e.nativeEvent.offsetY || 0;
+      const { xp, yp } = getRelativeCoords(e);
       const newMouse = { xp, yp, mouseDown: false, mouseButton: 0 };
       setMouse(newMouse);
       sendMouseCoordinates(newMouse);
@@ -212,9 +215,7 @@ export default function withMouseKeyHandler<P extends object>(
       // Let's not overload the endpoint with useless events.
       if (!mouse.mouseDown) return;
 
-      const rect = handlerRef.current ? handlerRef.current.getBoundingClientRect() : null;
-      const xp = rect && rect.width > 0 ? e.clientX - rect.left : e.nativeEvent.offsetX || 0;
-      const yp = rect && rect.height > 0 ? e.clientY - rect.top : e.nativeEvent.offsetY || 0;
+      const { xp, yp } = getRelativeCoords(e);
       const newMouse = { ...mouse, xp, yp };
       setMouse(newMouse);
       sendMouseCoordinates(newMouse);

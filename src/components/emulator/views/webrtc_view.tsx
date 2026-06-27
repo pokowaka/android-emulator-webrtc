@@ -94,23 +94,19 @@ const EmulatorWebrtcView: React.FC<EmulatorWebrtcViewProps> = ({
     }
   };
 
-  const safePlay = () => {
+  const safePlay = async () => {
     const video = videoRef.current;
     if (!video) {
       // Component was unmounted.
       return;
     }
 
-    const possiblePromise = video.play();
-    if (possiblePromise) {
-      possiblePromise
-        .then((_) => {
-          logger.debug("Automatic playback started!");
-        })
-        .catch((error) => {
-          // Notify listeners that we cannot start.
-          onError(error);
-        });
+    try {
+      await video.play();
+      logger.debug("Automatic playback started!");
+    } catch (error: any) {
+      // Notify listeners that we cannot start.
+      onError(error);
     }
   };
 
