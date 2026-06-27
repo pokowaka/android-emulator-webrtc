@@ -512,6 +512,10 @@ export default class WsJsepProtocol {
       this.ws = null;
     }
     if (this.peerConnection) {
+      this.peerConnection.ontrack = null;
+      this.peerConnection.onicecandidate = null;
+      this.peerConnection.onconnectionstatechange = null;
+      this.peerConnection.ondatachannel = null;
       this.peerConnection.close();
       this.peerConnection = null;
     }

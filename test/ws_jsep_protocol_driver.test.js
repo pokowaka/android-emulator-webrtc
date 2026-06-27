@@ -122,6 +122,26 @@ describe("WsJsepProtocol Reconnection", () => {
     expect(global.WebSocket).toHaveBeenCalledTimes(1); // No new attempts
   });
 
+  test("Nullifies peerConnection event handlers on disconnect to prevent memory leaks", async () => {
+    const jsep = new WsJsepProtocol("ws://foo/jsep", null);
+    jsep.startStream({ onConnected, onDisconnected });
+
+    // Simulate start signal to instantiate peerConnection
+    const startSignal = { start: {} };
+    await jsep._handleSignal(startSignal);
+
+    expect(jsep.peerConnection).not.toBeNull();
+    expect(mockPeerConnectionInstance.ontrack).not.toBeNull();
+
+    // Disconnect
+    jsep.disconnect();
+
+    expect(mockPeerConnectionInstance.ontrack).toBeNull();
+    expect(mockPeerConnectionInstance.onicecandidate).toBeNull();
+    expect(mockPeerConnectionInstance.onconnectionstatechange).toBeNull();
+    expect(mockPeerConnectionInstance.ondatachannel).toBeNull();
+  });
+
   describe("Event sending and fallbacks", () => {
     let mockMsg;
     let mockEmulator;
