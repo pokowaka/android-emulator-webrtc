@@ -170,6 +170,33 @@ describe("The emulator", () => {
     });
   });
 
+  test("Invokes onError callback when GPS update REST call fails", async () => {
+    const onErrorMock = jest.fn();
+    
+    // Mock fetch to return a 500 Server Error
+    global.fetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+      })
+    );
+
+    await renderEmulator(
+      <Emulator
+        uri="localhost:8080"
+        width={300}
+        height={300}
+        gps={{ latitude: 47.6062, longitude: 122.3321 }}
+        onError={onErrorMock}
+      />
+    );
+
+    await waitFor(() => {
+      expect(onErrorMock).toHaveBeenCalledWith(expect.any(Error));
+      expect(onErrorMock.mock.calls[0][0].message).toContain("Failed to update GPS: HTTP 500");
+    });
+  });
+
   test("Does not re-send GPS coordinates on unrelated rerenders", async () => {
     const { rerender } = await renderEmulator(
       <Emulator

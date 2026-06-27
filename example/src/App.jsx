@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { Emulator } from '../../src';
+import { Emulator, logger } from '../../src';
+
+logger.setLevel("debug");
 
 function App() {
   const [uri, setUri] = useState(window.location.host);

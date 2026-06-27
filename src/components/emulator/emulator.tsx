@@ -182,9 +182,15 @@ const Emulator = forwardRef<EmulatorRef, EmulatorProps>(
         method: 'POST',
         headers,
         body,
-      }).catch(err => {
-        if (onError) onError(err);
-      });
+      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Failed to update GPS: HTTP ${res.status}`);
+          }
+        })
+        .catch(err => {
+          if (onError) onError(err);
+        });
     }, [
       gps?.latitude,
       gps?.longitude,
