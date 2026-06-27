@@ -63,6 +63,9 @@ export interface EmulatorRef {
 
 /**
  * Resolves the given URI into the required REST and WebSocket endpoints for the emulator.
+ *
+ * @param uri The base URI of the emulator gateway.
+ * @returns An object containing the resolved REST and WebSocket URLs.
  */
 const getUrls = (uri: string) => {
   let restBase = uri;
@@ -108,13 +111,6 @@ const getUrls = (uri: string) => {
  * "AppSwitch"       -  Should bring up the application switcher dialog.
  * "GoHome"          -  Go to the home screen.
  * "GoBack"          -  Open the previous screen you were looking at.
- *
- * **Note**: The user must have interacted with the page before you can set the volume to "unmuted" (muted = false). Otherwise the video
- * will not play and will throw an error, which is currently not handled.
- *
- * **Note**: The volume is the volume of the video element that is displayed, this is not the actual volume used inside the emulator. You can change the audio inside the emulator by sending the proper keys as documented
- * above, or follow the steps in the [support](https://support.google.com/android/answer/9082609?hl=en) document
- * on how to change the audio volume.
  *
  */
 const Emulator = forwardRef<EmulatorRef, EmulatorProps>(
