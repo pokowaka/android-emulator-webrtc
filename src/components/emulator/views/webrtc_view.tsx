@@ -18,13 +18,21 @@ import logger from "../net/logger";
 import WsJsepProtocol from "../net/ws_jsep_protocol_driver";
 
 export interface EmulatorWebrtcViewProps {
+  /** The JSEP protocol driver instance. */
   jsep: WsJsepProtocol;
+  /** Callback for connection state changes ("connecting", "connected", "disconnected"). */
   onStateChange?: (state: string) => void;
+  /** Callback when audio track status changes. */
   onAudioStateChange?: (audio: boolean) => void;
+  /** Whether the audio should be muted. */
   muted?: boolean;
+  /** Audio volume (between 0.0 and 1.0). */
   volume?: number;
+  /** Callback invoked on signaling or playback errors. */
   onError?: (error: Error) => void;
+  /** Component width. */
   width?: number;
+  /** Component height. */
   height?: number;
 }
 
