@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 import WsJsepProtocol from "../src/components/emulator/net/ws_jsep_protocol_driver";
+import logger from "../src/components/emulator/net/logger";
 
 describe("WsJsepProtocol Reconnection", () => {
   let mockWebSocketInstance;
@@ -119,5 +120,61 @@ describe("WsJsepProtocol Reconnection", () => {
 
     jest.advanceTimersByTime(1000);
     expect(global.WebSocket).toHaveBeenCalledTimes(1); // No new attempts
+  });
+
+  describe("Event sending and fallbacks", () => {
+    let mockMsg;
+    let mockEmulator;
+
+    beforeEach(() => {
+      mockMsg = {
+        serializeBinary: jest.fn().mockReturnValue(new Uint8Array([1, 2, 3])),
+      };
+      mockEmulator = {
+        sendMouse: jest.fn(),
+        sendKey: jest.fn(),
+        sendTouch: jest.fn(),
+      };
+    });
+
+    test("Sends via DataChannel when connected and channel is open", () => {
+      const jsep = new WsJsepProtocol("ws://foo/jsep", mockEmulator);
+      const mockChannel = {
+        readyState: "open",
+        send: jest.fn(),
+      };
+      jsep.connected = true;
+      jsep.event_forwarders["mouse"] = mockChannel;
+
+      jsep.send("mouse", mockMsg);
+
+      expect(mockChannel.send).toHaveBeenCalledWith(new Uint8Array([1, 2, 3]));
+      expect(mockEmulator.sendMouse).not.toHaveBeenCalled();
+    });
+
+    test("Falls back to emulator controller when WebRTC is not connected", () => {
+      const jsep = new WsJsepProtocol("ws://foo/jsep", mockEmulator);
+      jsep.connected = false;
+
+      jsep.send("mouse", mockMsg);
+      expect(mockEmulator.sendMouse).toHaveBeenCalledWith(mockMsg);
+
+      jsep.send("keyboard", mockMsg);
+      expect(mockEmulator.sendKey).toHaveBeenCalledWith(mockMsg);
+
+      jsep.send("touch", mockMsg);
+      expect(mockEmulator.sendTouch).toHaveBeenCalledWith(mockMsg);
+    });
+
+    test("Drops event and logs warning if neither WebRTC nor emulator fallback is available", () => {
+      const loggerWarnSpy = jest.spyOn(logger, "warn").mockImplementation(() => {});
+      const jsep = new WsJsepProtocol("ws://foo/jsep", null); // No emulator fallback
+      jsep.connected = false;
+
+      jsep.send("mouse", mockMsg);
+
+      expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining("Event was dropped"));
+      loggerWarnSpy.mockRestore();
+    });
   });
 });
