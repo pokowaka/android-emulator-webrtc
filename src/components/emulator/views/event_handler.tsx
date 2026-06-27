@@ -61,11 +61,6 @@ export default function withMouseKeyHandler<P extends object>(
     });
 
     const handlerRef = useRef<HTMLDivElement>(null);
-    const statusRef = useRef<EmulatorStatus | null>(null);
-
-    if (!statusRef.current) {
-      statusRef.current = new EmulatorStatus(statusUrl, auth);
-    }
 
     useImperativeHandle(ref, () => ({
       scaleCoordinates,
@@ -75,7 +70,8 @@ export default function withMouseKeyHandler<P extends object>(
     }));
 
     useEffect(() => {
-      statusRef.current?.updateStatus((state) => {
+      const status = new EmulatorStatus(statusUrl, auth);
+      status.updateStatus((state) => {
         setDeviceWidth(parseInt(state.hardwareConfig?.["hw.lcd.width"] || "") || DEFAULT_WIDTH);
         setDeviceHeight(parseInt(state.hardwareConfig?.["hw.lcd.height"] || "") || DEFAULT_HEIGHT);
       });

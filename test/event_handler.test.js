@@ -126,6 +126,25 @@ describe("The event handler", () => {
     expect(touchEvent1.getTouchesList()[0].getY()).toBe(10);
   });
 
+  test("Re-creates EmulatorStatus and fetches from new URL when statusUrl prop changes", async () => {
+    global.fetch.mockClear();
+    
+    const { rerender } = render(<TestView statusUrl="http://foo/status" jsep={mockJsep} />);
+    
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith("http://foo/status", expect.any(Object));
+    });
+
+    global.fetch.mockClear();
+
+    // Rerender with a new URL
+    rerender(<TestView statusUrl="http://bar/status" jsep={mockJsep} />);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith("http://bar/status", expect.any(Object));
+    });
+  });
+
   describe("scaleCoordinates aspect ratio scaling & bounds", () => {
     let hocRef;
 
