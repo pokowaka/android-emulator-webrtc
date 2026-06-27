@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import PropTypes from "prop-types";
 import React, {
   useState,
   useEffect,
@@ -29,16 +28,43 @@ import Proto from "../../proto/emulator_controller_pb";
 
 const RtcView = withMouseKeyHandler(EmulatorWebrtcView);
 
+export interface EmulatorProps {
+  /** Endpoint where we can reach the emulator gateway (host:port or http(s)://host:port). */
+  uri: string;
+  /** The authentication service to use, or null for no authentication. */
+  auth?: any;
+  /** True if the audio should be disabled. */
+  muted?: boolean;
+  /** Volume between [0, 1] when audio is enabled. 0 is muted, 1.0 is 100% */
+  volume?: number;
+  /** Called upon state change, one of ["connecting", "connected", "disconnected"] */
+  onStateChange?: (state: string) => void;
+  /** Called when the audio becomes (un)available. True if audio is available, false otherwise. */
+  onAudioStateChange?: (audio: boolean) => void;
+  /** The width of the component */
+  width?: number;
+  /** The height of the component */
+  height?: number;
+  /** A [GeolocationCoordinates](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates) like object indicating where the device is. */
+  gps?: {
+    latitude: number;
+    longitude: number;
+    altitude?: number;
+    heading?: number;
+    speed?: number;
+  };
+  /** Callback that will be invoked in case of errors. */
+  onError?: (error: any) => void;
+}
+
+export interface EmulatorRef {
+  sendKey(key: string): void;
+}
+
 /**
  * Resolves the given URI into the required REST and WebSocket endpoints for the emulator.
- *
- * @param {string} uri The base URI of the emulator gateway.
- * @returns {Object} An object containing the resolved URLs:
- *                   - status: The REST endpoint for retrieving emulator status.
- *                   - gps: The REST endpoint for setting GPS coordinates.
- *                   - jsep: The WebSocket endpoint for WebRTC JSEP signaling.
  */
-const getUrls = (uri) => {
+const getUrls = (uri: string) => {
   let restBase = uri;
   if (!/^https?:\/\//i.test(uri)) {
     restBase = "http://" + uri;
@@ -91,7 +117,7 @@ const getUrls = (uri) => {
  * on how to change the audio volume.
  *
  */
-const Emulator = forwardRef(
+const Emulator = forwardRef<EmulatorRef, EmulatorProps>(
   (
     {
       uri,
@@ -113,11 +139,11 @@ const Emulator = forwardRef(
     },
     ref
   ) => {
-    const [audio, setAudio] = useState(false);
-    const jsep = useRef(null);
-    const viewRef = useRef(null);
+    const [audio, setAudio] = useState<boolean>(false);
+    const jsep = useRef<WsJsepProtocol | null>(null);
+    const viewRef = useRef<any>(null);
 
-    const onErrorRef = useRef(onError);
+    const onErrorRef = useRef<(error: any) => void>(onError);
     useEffect(() => {
       onErrorRef.current = onError;
     }, [onError]);
@@ -140,7 +166,7 @@ const Emulator = forwardRef(
         return;
       }
 
-      const headers = {
+      const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
       if (auth && auth.authHeader) {
@@ -174,14 +200,14 @@ const Emulator = forwardRef(
 
     useImperativeHandle(ref, () => ({
       sendKey: (key) => {
-        var request = new Proto.KeyboardEvent();
-        request.setEventtype(Proto.KeyboardEvent.KeyEventType.KEYPRESS);
+        const request = new (Proto as any).KeyboardEvent();
+        request.setEventtype((Proto as any).KeyboardEvent.KeyEventType.KEYPRESS);
         request.setKey(key);
-        jsep.current.send("keyboard", request);
+        jsep.current?.send("keyboard", request);
       },
     }));
 
-    const _onAudioStateChange = (s) => {
+    const _onAudioStateChange = (s: boolean) => {
       setAudio(s);
       onAudioStateChange(s);
     };
@@ -204,28 +230,5 @@ const Emulator = forwardRef(
     );
   }
 );
-
-Emulator.propTypes = {
-  /** Endpoint where we can reach the emulator gateway (host:port or http(s)://host:port). */
-  uri: PropTypes.string.isRequired,
-  /** The authentication service to use, or null for no authentication. */
-  auth: PropTypes.object,
-  /** True if the audio should be disabled. */
-  muted: PropTypes.bool,
-  /** Volume between [0, 1] when audio is enabled. 0 is muted, 1.0 is 100% */
-  volume: PropTypes.number,
-  /** Called upon state change, one of ["connecting", "connected", "disconnected"] */
-  onStateChange: PropTypes.func,
-  /** Called when the audio becomes (un)available. True if audio is available, false otherwise. */
-  onAudioStateChange: PropTypes.func,
-  /** The width of the component */
-  width: PropTypes.number,
-  /** The height of the component */
-  height: PropTypes.number,
-  /** A [GeolocationCoordinates](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates) like object indicating where the device is. */
-  gps: PropTypes.object,
-  /** Callback that will be invoked in case of errors. */
-  onError: PropTypes.func,
-};
 
 export default Emulator;
