@@ -57,6 +57,7 @@ const customTerminalLoggingPlugin = () => {
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
   return {
+    base: '/android-emulator-webrtc/',
     plugins: [
       react(),
       protoCommonjsPlugin(),
