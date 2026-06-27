@@ -83,7 +83,12 @@ const EmulatorWebrtcView: React.FC<EmulatorWebrtcViewProps> = ({
     if (!video.srcObject) {
       video.srcObject = new MediaStream();
     }
-    (video.srcObject as MediaStream).addTrack(track);
+    
+    const stream = video.srcObject as MediaStream;
+    if (!stream.getTracks().find((t) => t.id === track.id)) {
+      stream.addTrack(track);
+    }
+
     if (track.kind === "audio") {
       setAudio(true);
     }

@@ -18,7 +18,7 @@
  */
 import "@testing-library/jest-dom";
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
 import EmulatorWebrtcView from "../src/components/emulator/views/webrtc_view";
 
 describe("EmulatorWebrtcView", () => {
@@ -43,5 +43,40 @@ describe("EmulatorWebrtcView", () => {
     // Update volume prop
     rerender(<EmulatorWebrtcView jsep={mockJsep} volume={0.8} muted={false} />);
     expect(videoElement.volume).toBe(0.8);
+  });
+
+  test("Does not add duplicate tracks to the media stream", () => {
+    // Mock MediaStream and MediaStreamTrack for the JSDOM environment
+    const mockTracks = [];
+    const mockStream = {
+      addTrack: jest.fn((track) => mockTracks.push(track)),
+      getTracks: jest.fn(() => mockTracks),
+    };
+    
+    global.MediaStream = jest.fn(() => mockStream);
+
+    const { container } = render(
+      <EmulatorWebrtcView jsep={mockJsep} />
+    );
+
+    const videoElement = container.querySelector("video");
+    expect(videoElement).toBeInTheDocument();
+
+    // Get the startStream callbacks
+    expect(mockJsep.startStream).toHaveBeenCalled();
+    const { onConnected } = mockJsep.startStream.mock.calls[0][0];
+
+    const track = { id: "audio-track-1", kind: "audio" };
+
+    // Simulate connecting the track twice
+    act(() => {
+      onConnected(track);
+    });
+    act(() => {
+      onConnected(track);
+    });
+
+    expect(mockStream.addTrack).toHaveBeenCalledTimes(1);
+    expect(mockStream.getTracks()).toHaveLength(1);
   });
 });
