@@ -29,6 +29,15 @@ import Proto from "../../proto/emulator_controller_pb";
 
 const RtcView = withMouseKeyHandler(EmulatorWebrtcView);
 
+/**
+ * Resolves the given URI into the required REST and WebSocket endpoints for the emulator.
+ *
+ * @param {string} uri The base URI of the emulator gateway.
+ * @returns {Object} An object containing the resolved URLs:
+ *                   - status: The REST endpoint for retrieving emulator status.
+ *                   - gps: The REST endpoint for setting GPS coordinates.
+ *                   - jsep: The WebSocket endpoint for WebRTC JSEP signaling.
+ */
 const getUrls = (uri) => {
   let restBase = uri;
   if (!/^https?:\/\//i.test(uri)) {

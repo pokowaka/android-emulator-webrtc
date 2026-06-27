@@ -17,13 +17,28 @@ import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import logger from "../net/logger";
 
+/**
+ * A React component that renders the WebRTC video stream of the emulator.
+ * Handles establishing the stream via the JSEP protocol driver and managing
+ * local playback (including handling autoplay constraints).
+ *
+ * @param {Object} props Component properties.
+ * @param {Object} props.jsep The JSEP protocol driver instance.
+ * @param {function(string): void} [props.onStateChange] Callback for connection state changes ("connecting", "connected", "disconnected").
+ * @param {function(boolean): void} [props.onAudioStateChange] Callback when audio track status changes.
+ * @param {boolean} [props.muted=true] Whether the audio should be muted.
+ * @param {number} [props.volume=1.0] Audio volume (between 0.0 and 1.0).
+ * @param {function(Error): void} props.onError Callback invoked on signaling or playback errors.
+ * @param {number} [props.width] Component width.
+ * @param {number} [props.height] Component height.
+ */
 const EmulatorWebrtcView = ({
   jsep,
   onStateChange,
   onAudioStateChange,
-  muted,
-  volume,
-  onError,
+  muted = true,
+  volume = 1.0,
+  onError = (e) => logger.error("WebRTC error: " + e),
   width,
   height,
 }) => {
@@ -135,12 +150,6 @@ EmulatorWebrtcView.propTypes = {
   onError: PropTypes.func,
   width: PropTypes.number,
   height: PropTypes.number,
-};
-
-EmulatorWebrtcView.defaultProps = {
-  muted: true,
-  volume: 1.0,
-  onError: (e) => logger.error("WebRTC error: " + e),
 };
 
 export default EmulatorWebrtcView;

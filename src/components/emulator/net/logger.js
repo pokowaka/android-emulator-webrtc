@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Configures and exports a loglevel logger instance scoped to
+ * the 'android-emulator-webrtc' package.
+ */
+
 import log from "loglevel";
 
 // Create a logger specific to the emulator package

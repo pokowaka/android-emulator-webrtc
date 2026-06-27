@@ -38,6 +38,14 @@ import logger from "./logger";
  * @class WsJsepProtocol
  */
 export default class WsJsepProtocol {
+  /**
+   * Creates an instance of WsJsepProtocol.
+   *
+   * @param {string} wsUrl The WebSocket JSEP signaling URL.
+   * @param {Object} [emulator=null] Fallback emulator controller for sending events when WebRTC is unavailable.
+   * @param {Object} [config={}] Configuration options.
+   * @param {boolean} [config.enableLogging=false] Whether verbose signaling logging is enabled.
+   */
   constructor(wsUrl, emulator = null, config = {}) {
     this.wsUrl = wsUrl;
     this.emulator = emulator;
@@ -60,12 +68,21 @@ export default class WsJsepProtocol {
     this.isProcessingSignal = false;
   }
 
+  /**
+   * Registers an event listener on the internal EventEmitter.
+   *
+   * @param {string} name Event name (e.g., "connected", "disconnected", "error").
+   * @param {function} fn Callback function.
+   */
   on = (name, fn) => {
     this.events.on(name, fn);
   };
 
+  /**
+   * Establishes the WebSocket connection and starts the signaling process.
+   * Cleans up any existing connection beforehand.
+   */
   startStream = () => {
-    // FIX 3: Prevent Zombie connections by cleaning up first
     this.cleanup();
 
     this.ws = new WebSocket(this.wsUrl);
@@ -74,6 +91,13 @@ export default class WsJsepProtocol {
     this.ws.onerror = this._handleWsError;
   };
 
+  /**
+   * Internal handler for incoming WebSocket messages. Parses the signal
+   * and queues it for sequential processing.
+   *
+   * @private
+   * @param {MessageEvent} event The WebSocket message event.
+   */
   _handleWsMessage = (event) => {
     try {
       const signal = JSON.parse(event.data);
@@ -85,7 +109,11 @@ export default class WsJsepProtocol {
     }
   };
 
-  // NEW: Process signals strictly sequentially
+  /**
+   * Sequentially processes JSEP signals from the queue.
+   *
+   * @private
+   */
   _processSignalQueue = async () => {
     if (this.isProcessingSignal) return;
     this.isProcessingSignal = true;
@@ -98,18 +126,35 @@ export default class WsJsepProtocol {
     this.isProcessingSignal = false;
   };
 
+  /**
+   * Handles WebSocket connection close events.
+   *
+   * @private
+   * @param {CloseEvent} event The WebSocket close event.
+   */
   _handleWsClose = (event) => {
     logger.debug("WebSocket closed:", event);
     this.disconnect();
   };
 
+  /**
+   * Handles WebSocket error events.
+   *
+   * @private
+   * @param {Event} error The WebSocket error event.
+   */
   _handleWsError = (error) => {
     logger.error("WebSocket error:", error);
     this.events.emit("error", error);
     this.disconnect();
   };
 
-  // FIX 2: Await asynchronous handlers to prevent concurrent WebRTC state mutations
+  /**
+   * Processes a single JSEP signal (e.g., start, offer, answer, candidate, bye).
+   *
+   * @private
+   * @param {Object} signal The JSEP signaling message.
+   */
   _handleSignal = async (signal) => {
     logger.debug("JSEP << [Received from Server]:", JSON.stringify(signal, null, 2));
     
@@ -135,6 +180,12 @@ export default class WsJsepProtocol {
     }
   };
 
+  /**
+   * Initializes the RTCPeerConnection and local data channels based on the start configuration.
+   *
+   * @private
+   * @param {Object} config The signaling start configuration.
+   */
   _handleStart = async (config) => {
     const localOnlyConfig = {
       ...config,
@@ -162,11 +213,9 @@ export default class WsJsepProtocol {
 
     try {
       const offer = await this.peerConnection.createOffer();
-      // FIX 1: Check if we disconnected while yielding to createOffer
       if (!this.peerConnection) return;
 
       await this.peerConnection.setLocalDescription(offer);
-      // FIX 1: Check again after yielding to setLocalDescription
       if (!this.peerConnection) return;
 
       this._sendJsep({ sdp: offer });
@@ -175,15 +224,33 @@ export default class WsJsepProtocol {
     }
   };
 
+  /**
+   * Handles incoming media track events from the RTCPeerConnection.
+   *
+   * @private
+   * @param {RTCTrackEvent} e The track event.
+   */
   _handlePeerConnectionTrack = (e) => {
     this.events.emit("connected", e.track);
   };
 
+  /**
+   * Handles ICE candidate generation from the local RTCPeerConnection.
+   *
+   * @private
+   * @param {RTCPeerConnectionIceEvent} e The ICE candidate event.
+   */
   _handlePeerIceCandidate = (e) => {
     if (e.candidate === null) return;
     this._sendJsep({ candidate: e.candidate });
   };
 
+  /**
+   * Monitors connection state changes on the RTCPeerConnection to trigger disconnection.
+   *
+   * @private
+   * @param {Event} e The state change event.
+   */
   _handlePeerConnectionStateChange = (e) => {
     if (!this.peerConnection) return;
     switch (this.peerConnection.connectionState) {
@@ -194,20 +261,37 @@ export default class WsJsepProtocol {
     }
   };
 
+  /**
+   * Registers a data channel for event forwarding.
+   *
+   * @private
+   * @param {RTCDataChannel} channel The data channel.
+   */
   _setupDataChannel = (channel) => {
     this.event_forwarders[channel.label] = channel;
   };
 
+  /**
+   * Handles remote data channel creation.
+   *
+   * @private
+   * @param {RTCDataChannelEvent} e The data channel event.
+   */
   _handleDataChannel = (e) => {
     this._setupDataChannel(e.channel);
   };
 
+  /**
+   * Processes a remote SDP offer or answer, applying it to the RTCPeerConnection.
+   *
+   * @private
+   * @param {RTCSessionDescriptionInit} sdp The session description.
+   */
   _handleSDP = async (sdp) => {
     if (!this.peerConnection) return;
 
     try {
       await this.peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
-      // FIX 1: Check for disconnect during setRemoteDescription
       if (!this.peerConnection) return;
 
       this.remoteDescriptionSet = true;
@@ -232,6 +316,12 @@ export default class WsJsepProtocol {
     }
   };
 
+  /**
+   * Adds a remote ICE candidate to the RTCPeerConnection.
+   *
+   * @private
+   * @param {RTCIceCandidateInit|string} candidate The ICE candidate object or string.
+   */
   _addIceCandidate = (candidate) => {
     try {
       const candidateInit = typeof candidate === 'string'
@@ -243,6 +333,12 @@ export default class WsJsepProtocol {
     }
   };
 
+  /**
+   * Handles an incoming remote ICE candidate, queueing it if the remote description is not yet set.
+   *
+   * @private
+   * @param {RTCIceCandidateInit} candidate The remote ICE candidate.
+   */
   _handleCandidate = (candidate) => {
     if (!this.peerConnection) return;
     if (!this.remoteDescriptionSet) {
@@ -253,10 +349,21 @@ export default class WsJsepProtocol {
     }
   };
 
+  /**
+   * Handles the 'bye' signal from the remote side, triggering disconnection.
+   *
+   * @private
+   */
   _handleBye = () => {
     this.disconnect();
   };
 
+  /**
+   * Serializes and sends a JSEP JSON message over the WebSocket.
+   *
+   * @private
+   * @param {Object} jsonObject The JSON payload.
+   */
   _sendJsep = (jsonObject) => {
     logger.debug("JSEP >> [Sending to Server]:", JSON.stringify(jsonObject, null, 2));
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -264,6 +371,13 @@ export default class WsJsepProtocol {
     }
   };
 
+  /**
+   * Sends a control message (mouse, keyboard, touch) over either the corresponding
+   * WebRTC DataChannel or via the fallback emulator controller.
+   *
+   * @param {string} label The channel label ("mouse", "keyboard", "touch").
+   * @param {Object} msg The protobuf message instance.
+   */
   send(label, msg) {
     let bytes = msg.serializeBinary();
     let forwarder = this.event_forwarders[label];
@@ -282,10 +396,13 @@ export default class WsJsepProtocol {
           break;
       }
     } else {
-      logger.warn("Data channel not open and no gRPC fallback available for " + label);
+      logger.warn(`Data channel '${label}' is not open. Event was dropped.`);
     }
   }
 
+  /**
+   * Disconnects both the WebSocket signaling connection and the WebRTC PeerConnection.
+   */
   disconnect = () => {
     this.connected = false;
 
@@ -313,6 +430,9 @@ export default class WsJsepProtocol {
     this.events.emit("disconnected", this);
   };
 
+  /**
+   * Fully cleans up signaling and WebRTC state.
+   */
   cleanup = () => {
     this.disconnect();
     this.event_forwarders = {};

@@ -17,8 +17,9 @@
 import logger from "./logger";
 
 /**
- * Gets the status of the emulator, parsing the hardware config into something
- * easy to digest.
+ * Utility class to query and manage the emulator's status by communicating
+ * with its REST configuration endpoint. It parses the hardware configuration
+ * and caches the status.
  *
  * @export
  * @class EmulatorStatus
@@ -28,7 +29,8 @@ class EmulatorStatus {
    * Creates an EmulatorStatus object that can retrieve the status of the running emulator.
    *
    * @param {string} statusUrl The REST endpoint to retrieve status.
-   * @param {object} auth The authentication service to use, or null for no authentication.
+   * @param {Object} [auth] The authentication service to use, or null for no authentication.
+   * @param {function} [auth.authHeader] Function returning authorization headers.
    */
   constructor(statusUrl, auth) {
     this.statusUrl = statusUrl;
@@ -37,8 +39,9 @@ class EmulatorStatus {
   }
 
   /**
-   * Gets the cached status.
+   * Gets the cached status object.
    *
+   * @returns {Object|null} The cached emulator status or null if not yet loaded.
    * @memberof EmulatorStatus
    */
   getStatus = () => {
@@ -46,10 +49,10 @@ class EmulatorStatus {
   };
 
   /**
-   * Retrieves the current status from the emulator.
+   * Retrieves the current status from the emulator REST endpoint.
    *
-   * @param  {Callback} fnNotify when the status is available, returns the retrieved status.
-   * @param  {boolean} cache True if the cache can be used.
+   * @param {function(Object): void} fnNotify Callback invoked when the status is retrieved. Receives the status object.
+   * @param {boolean} [cache=false] If true, uses the cached status if available instead of fetching.
    * @memberof EmulatorStatus
    */
   updateStatus = (fnNotify, cache) => {
