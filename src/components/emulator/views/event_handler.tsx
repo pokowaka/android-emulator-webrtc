@@ -1,11 +1,34 @@
-import PropTypes from "prop-types";
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import Proto from "../../../proto/emulator_controller_pb";
 import EmulatorStatus from "../net/emulator_status";
 import logger from "../net/logger";
+import WsJsepProtocol from "../net/ws_jsep_protocol_driver";
 
 const DEFAULT_WIDTH = 1080;
 const DEFAULT_HEIGHT = 2424;
+
+export interface MouseKeyHandlerProps {
+  statusUrl: string;
+  jsep: WsJsepProtocol;
+  auth?: any;
+  width?: number;
+  height?: number;
+  [key: string]: any;
+}
+
+export interface MouseKeyHandlerRef {
+  scaleCoordinates(xp: number, yp: number): { x: number; y: number; scaleX: number; scaleY: number };
+  setDeviceWidth: React.Dispatch<React.SetStateAction<number>>;
+  setDeviceHeight: React.Dispatch<React.SetStateAction<number>>;
+  handlerRef: React.RefObject<HTMLDivElement>;
+}
+
+interface MouseState {
+  xp: number;
+  yp: number;
+  mouseDown: boolean;
+  mouseButton: number;
+}
 
 /**
  * A handler that extends a view to send key/mouse events to the emulator.
@@ -17,21 +40,23 @@ const DEFAULT_HEIGHT = 2424;
  *
  * You usually want to wrap a EmulatorRtcview, or EmulatorPngView in it.
  */
-export default function withMouseKeyHandler(WrappedComponent) {
-  const MouseKeyHandler = forwardRef((props, ref) => {
+export default function withMouseKeyHandler<P extends object>(
+  WrappedComponent: React.ComponentType<P>
+) {
+  const MouseKeyHandler = forwardRef<MouseKeyHandlerRef, MouseKeyHandlerProps & P>((props, ref) => {
     const { statusUrl, auth, jsep, width, height } = props;
 
-    const [deviceWidth, setDeviceWidth] = useState(DEFAULT_WIDTH);
-    const [deviceHeight, setDeviceHeight] = useState(DEFAULT_HEIGHT);
-    const [mouse, setMouse] = useState({
+    const [deviceWidth, setDeviceWidth] = useState<number>(DEFAULT_WIDTH);
+    const [deviceHeight, setDeviceHeight] = useState<number>(DEFAULT_HEIGHT);
+    const [mouse, setMouse] = useState<MouseState>({
       xp: 0,
       yp: 0,
       mouseDown: false,
       mouseButton: 0,
     });
 
-    const handlerRef = useRef(null);
-    const statusRef = useRef(null);
+    const handlerRef = useRef<HTMLDivElement>(null);
+    const statusRef = useRef<EmulatorStatus | null>(null);
 
     if (!statusRef.current) {
       statusRef.current = new EmulatorStatus(statusUrl, auth);
@@ -45,13 +70,13 @@ export default function withMouseKeyHandler(WrappedComponent) {
     }));
 
     useEffect(() => {
-      statusRef.current.updateStatus((state) => {
-        setDeviceWidth(parseInt(state.hardwareConfig["hw.lcd.width"]) || DEFAULT_WIDTH);
-        setDeviceHeight(parseInt(state.hardwareConfig["hw.lcd.height"]) || DEFAULT_HEIGHT);
+      statusRef.current?.updateStatus((state) => {
+        setDeviceWidth(parseInt(state.hardwareConfig?.["hw.lcd.width"] || "") || DEFAULT_WIDTH);
+        setDeviceHeight(parseInt(state.hardwareConfig?.["hw.lcd.height"] || "") || DEFAULT_HEIGHT);
       });
     }, [statusUrl, auth]);
 
-    const onContextMenu = (e) => {
+    const onContextMenu = (e: React.MouseEvent) => {
       e.preventDefault();
     };
 
@@ -64,8 +89,8 @@ export default function withMouseKeyHandler(WrappedComponent) {
      * ensuring that clicks on black borders are ignored and clicks on the active area
      * are correctly mapped.
      */
-    const scaleCoordinates = (xp, yp) => {
-      const { clientHeight, clientWidth } = handlerRef.current;
+    const scaleCoordinates = (xp: number, yp: number) => {
+      const { clientHeight, clientWidth } = handlerRef.current!;
 
       const deviceRatio = deviceWidth / deviceHeight;
       const containerRatio = clientWidth / clientHeight;
@@ -117,32 +142,30 @@ export default function withMouseKeyHandler(WrappedComponent) {
       return { x, y, scaleX, scaleY };
     };
 
-    const sendMouseCoordinates = (currentMouse) => {
+    const sendMouseCoordinates = (currentMouse: MouseState) => {
       const { mouseDown, mouseButton, xp, yp } = currentMouse;
       const { x, y } = scaleCoordinates(xp, yp);
       if (x < 0 || y < 0) {
         return;
       }
-      const request = new Proto.MouseEvent();
+      const request = new (Proto as any).MouseEvent();
       request.setX(x);
       request.setY(y);
       request.setButtons(mouseDown ? mouseButton : 0);
       jsep.send("mouse", request);
     };
 
-    const handleKey = (eventType) => {
-      return (e) => {
+    const handleKey = (eventType: "KEYDOWN" | "KEYUP") => {
+      return (e: React.KeyboardEvent) => {
         // Disable jumping to next control when pressing the space bar.
         if (e.keyCode === 32) {
           e.preventDefault();
         }
-        const request = new Proto.KeyboardEvent();
+        const request = new (Proto as any).KeyboardEvent();
         request.setEventtype(
           eventType === "KEYDOWN"
-            ? Proto.KeyboardEvent.KeyEventType.KEYDOWN
-            : eventType === "KEYUP"
-            ? Proto.KeyboardEvent.KeyEventType.KEYUP
-            : Proto.KeyboardEvent.KeyEventType.KEYPRESS
+            ? (Proto as any).KeyboardEvent.KeyEventType.KEYDOWN
+            : (Proto as any).KeyboardEvent.KeyEventType.KEYUP
         );
         request.setKey(e.key);
         jsep.send("keyboard", request);
@@ -150,7 +173,7 @@ export default function withMouseKeyHandler(WrappedComponent) {
     };
 
     // Properly handle the mouse events.
-    const handleMouseDown = (e) => {
+    const handleMouseDown = (e: React.MouseEvent) => {
       const rect = handlerRef.current ? handlerRef.current.getBoundingClientRect() : null;
       const xp = rect && rect.width > 0 ? e.clientX - rect.left : e.nativeEvent.offsetX || 0;
       const yp = rect && rect.height > 0 ? e.clientY - rect.top : e.nativeEvent.offsetY || 0;
@@ -166,7 +189,7 @@ export default function withMouseKeyHandler(WrappedComponent) {
       sendMouseCoordinates(newMouse);
     };
 
-    const handleMouseUp = (e) => {
+    const handleMouseUp = (e: React.MouseEvent) => {
       const rect = handlerRef.current ? handlerRef.current.getBoundingClientRect() : null;
       const xp = rect && rect.width > 0 ? e.clientX - rect.left : e.nativeEvent.offsetX || 0;
       const yp = rect && rect.height > 0 ? e.clientY - rect.top : e.nativeEvent.offsetY || 0;
@@ -175,7 +198,7 @@ export default function withMouseKeyHandler(WrappedComponent) {
       sendMouseCoordinates(newMouse);
     };
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: React.MouseEvent) => {
       // Let's not overload the endpoint with useless events.
       if (!mouse.mouseDown) return;
 
@@ -190,7 +213,7 @@ export default function withMouseKeyHandler(WrappedComponent) {
     /**
      * Scales an axis to linux input codes that the emulator understands.
      */
-    const scaleAxis = (value, minIn, maxIn) => {
+    const scaleAxis = (value: number, minIn: number, maxIn: number) => {
       const minOut = 0x0; // EV_ABS_MIN
       const maxOut = 0x7fff; // EV_ABS_MAX
       const rangeOut = maxOut - minOut;
@@ -201,10 +224,10 @@ export default function withMouseKeyHandler(WrappedComponent) {
       return (((value - minIn) * rangeOut) / rangeIn + minOut) | 0;
     };
 
-    const setTouchCoordinates = (type, touches, minForce, maxForce) => {
+    const setTouchCoordinates = (type: string, touches: TouchList, minForce: number, maxForce: number) => {
       // We need to calculate the offset of the touch events.
-      const rect = handlerRef.current.getBoundingClientRect();
-      const touchesToSend = [];
+      const rect = handlerRef.current!.getBoundingClientRect();
+      const touchesToSend: any[] = [];
 
       for (let i = 0; i < touches.length; i++) {
         const touch = touches[i];
@@ -220,7 +243,7 @@ export default function withMouseKeyHandler(WrappedComponent) {
         const scaledRadiusX = 2 * radiusX * scaleX;
         const scaledRadiusY = 2 * radiusY * scaleY;
 
-        const protoTouch = new Proto.Touch();
+        const protoTouch = new (Proto as any).Touch();
         protoTouch.setX(x | 0);
         protoTouch.setY(y | 0);
         protoTouch.setIdentifier(identifier);
@@ -243,13 +266,13 @@ export default function withMouseKeyHandler(WrappedComponent) {
       }
 
       // Make the grpc call.
-      const requestTouchEvent = new Proto.TouchEvent();
+      const requestTouchEvent = new (Proto as any).TouchEvent();
       requestTouchEvent.setTouchesList(touchesToSend);
       jsep.send("touch", requestTouchEvent);
     };
 
-    const handleTouch = (minForce, maxForce) => {
-      return (e) => {
+    const handleTouch = (minForce: number, maxForce: number) => {
+      return (e: React.TouchEvent) => {
         // Make sure they are not processed as mouse events later on.
         if (e.cancelable) {
           e.preventDefault();
@@ -263,6 +286,10 @@ export default function withMouseKeyHandler(WrappedComponent) {
       };
     };
 
+    const onMouseOut = (e: React.MouseEvent) => {
+      handleMouseUp(e);
+    };
+
     return (
       <div
         onTouchStart={handleTouch(0.01, 1.0)}
@@ -272,11 +299,11 @@ export default function withMouseKeyHandler(WrappedComponent) {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseOut={handleMouseUp}
+        onMouseOut={onMouseOut}
         onKeyDown={handleKey("KEYDOWN")}
         onKeyUp={handleKey("KEYUP")}
         onContextMenu={onContextMenu}
-        tabIndex="0"
+        tabIndex={0}
         ref={handlerRef}
         style={{
           pointerEvents: "all",
@@ -289,21 +316,10 @@ export default function withMouseKeyHandler(WrappedComponent) {
           height: height ? `${height}px` : "auto",
         }}
       >
-        <WrappedComponent {...props} />
+        <WrappedComponent {...props as P} />
       </div>
     );
   });
-
-  MouseKeyHandler.propTypes = {
-    /** The REST endpoint to retrieve status */
-    statusUrl: PropTypes.string,
-    /** Jsep protocol driver, used to send mouse & touch events. */
-    jsep: PropTypes.object.isRequired,
-    /** The authentication service to use */
-    auth: PropTypes.object,
-    width: PropTypes.number,
-    height: PropTypes.number,
-  };
 
   return MouseKeyHandler;
 }
