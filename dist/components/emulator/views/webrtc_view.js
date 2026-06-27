@@ -118,14 +118,20 @@ var EmulatorWebrtcView = function EmulatorWebrtcView(_ref) {
     e.preventDefault();
   };
   (0, _react.useEffect)(function () {
-    jsep.on("connected", onConnect);
-    jsep.on("disconnected", onDisconnect);
-    jsep.startStream();
+    jsep.startStream({
+      onConnected: onConnect,
+      onDisconnected: onDisconnect
+    });
     setConnect("connecting");
     return function () {
       jsep.disconnect();
     };
   }, []);
+  (0, _react.useEffect)(function () {
+    if (videoRef.current) {
+      videoRef.current.volume = volume;
+    }
+  }, [volume]);
   return /*#__PURE__*/_react["default"].createElement("video", {
     ref: videoRef,
     style: {
@@ -136,7 +142,6 @@ var EmulatorWebrtcView = function EmulatorWebrtcView(_ref) {
       objectFit: "contain",
       objectPosition: "center"
     },
-    volume: volume,
     muted: muted,
     onContextMenu: onContextMenu,
     onCanPlay: onCanPlay

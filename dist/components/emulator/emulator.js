@@ -130,10 +130,11 @@ var Emulator = /*#__PURE__*/(0, _react.forwardRef)(function (_ref, ref) {
   }, [onError]);
   var urls = getUrls(uri);
   if (!jsep.current) {
-    jsep.current = new _ws_jsep_protocol_driver["default"](urls.jsep);
-    jsep.current.on("error", function (err) {
-      if (onErrorRef.current) {
-        onErrorRef.current(err);
+    jsep.current = new _ws_jsep_protocol_driver["default"](urls.jsep, null, {
+      onError: function onError(err) {
+        if (onErrorRef.current) {
+          onErrorRef.current(err);
+        }
       }
     });
     _logger["default"].info("Created JSEP:", jsep.current);

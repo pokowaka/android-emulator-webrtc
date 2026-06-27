@@ -10,7 +10,6 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-var _events = require("events");
 var _logger = _interopRequireDefault(require("./logger"));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; } /*
@@ -56,31 +55,76 @@ var WsJsepProtocol = exports["default"] = /*#__PURE__*/function () {
    * @param {Object} [emulator=null] Fallback emulator controller for sending events when WebRTC is unavailable.
    * @param {Object} [config={}] Configuration options.
    * @param {boolean} [config.enableLogging=false] Whether verbose signaling logging is enabled.
+   * @param {function} [config.onError] Callback invoked when an error occurs.
+   * @param {number} [config.maxReconnectAttempts=5] Maximum number of reconnection attempts.
+   * @param {number} [config.reconnectDelay=1000] Initial delay for reconnection in milliseconds.
+   * @param {number} [config.reconnectBackoffFactor=2] Exponential backoff factor.
    */
   function WsJsepProtocol(wsUrl) {
-    var _this = this;
+    var _this = this,
+      _this$config$maxRecon,
+      _this$config$reconnec,
+      _this$config$reconnec2;
     var emulator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     var _config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     (0, _classCallCheck2["default"])(this, WsJsepProtocol);
     /**
-     * Registers an event listener on the internal EventEmitter.
-     *
-     * @param {string} name Event name (e.g., "connected", "disconnected", "error").
-     * @param {function} fn Callback function.
-     */
-    (0, _defineProperty2["default"])(this, "on", function (name, fn) {
-      _this.events.on(name, fn);
-    });
-    /**
      * Establishes the WebSocket connection and starts the signaling process.
      * Cleans up any existing connection beforehand.
+     *
+     * @param {Object} [callbacks] Callbacks for stream lifecycle events.
+     * @param {function(MediaStreamTrack): void} [callbacks.onConnected] Called when a media track is received.
+     * @param {function(): void} [callbacks.onDisconnected] Called when the stream is disconnected.
      */
     (0, _defineProperty2["default"])(this, "startStream", function () {
+      var callbacks = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       _this.cleanup();
+      _this.reconnectAttempts = 0;
+      _this.onConnected = callbacks.onConnected || _this.onConnected;
+      _this.onDisconnected = callbacks.onDisconnected || _this.onDisconnected;
+      _this.connected = true;
+      _this._connect();
+    });
+    /**
+     * Internal method to establish WebSocket connection.
+     *
+     * @private
+     */
+    (0, _defineProperty2["default"])(this, "_connect", function () {
+      if (_this.reconnectTimeoutId) {
+        clearTimeout(_this.reconnectTimeoutId);
+        _this.reconnectTimeoutId = null;
+      }
       _this.ws = new WebSocket(_this.wsUrl);
       _this.ws.onmessage = _this._handleWsMessage;
       _this.ws.onclose = _this._handleWsClose;
       _this.ws.onerror = _this._handleWsError;
+    });
+    /**
+     * Queues a reconnection attempt with exponential backoff.
+     *
+     * @private
+     */
+    (0, _defineProperty2["default"])(this, "_queueReconnect", function () {
+      if (_this.reconnectTimeoutId) return;
+      _this.reconnectAttempts++;
+      if (_this.reconnectAttempts > _this.maxReconnectAttempts) {
+        _logger["default"].error("Max reconnect attempts (".concat(_this.maxReconnectAttempts, ") reached. Giving up."));
+        if (_this.onError) {
+          _this.onError(new Error("Connection failed: Max reconnect attempts reached."));
+        }
+        _this.disconnect();
+        return;
+      }
+      var delay = _this.reconnectDelay * Math.pow(_this.reconnectBackoffFactor, _this.reconnectAttempts - 1);
+      _logger["default"].info("Queueing reconnect attempt ".concat(_this.reconnectAttempts, " in ").concat(delay, "ms"));
+      _this.reconnectTimeoutId = setTimeout(function () {
+        _this.reconnectTimeoutId = null;
+        // Partially disconnect to clean up the failed peer connection/websocket,
+        // but keep this.connected = true so we know we want to reconnect.
+        _this._disconnectState();
+        _this._connect();
+      }, delay);
     });
     /**
      * Internal handler for incoming WebSocket messages. Parses the signal
@@ -143,7 +187,11 @@ var WsJsepProtocol = exports["default"] = /*#__PURE__*/function () {
      */
     (0, _defineProperty2["default"])(this, "_handleWsClose", function (event) {
       _logger["default"].debug("WebSocket closed:", event);
-      _this.disconnect();
+      if (_this.connected) {
+        _this._queueReconnect();
+      } else {
+        _this.disconnect();
+      }
     });
     /**
      * Handles WebSocket error events.
@@ -153,8 +201,14 @@ var WsJsepProtocol = exports["default"] = /*#__PURE__*/function () {
      */
     (0, _defineProperty2["default"])(this, "_handleWsError", function (error) {
       _logger["default"].error("WebSocket error:", error);
-      _this.events.emit("error", error);
-      _this.disconnect();
+      if (_this.connected) {
+        _this._queueReconnect();
+      } else {
+        if (_this.onError) {
+          _this.onError(error);
+        }
+        _this.disconnect();
+      }
     });
     /**
      * Processes a single JSEP signal (e.g., start, offer, answer, candidate, bye).
@@ -294,7 +348,9 @@ var WsJsepProtocol = exports["default"] = /*#__PURE__*/function () {
      * @param {RTCTrackEvent} e The track event.
      */
     (0, _defineProperty2["default"])(this, "_handlePeerConnectionTrack", function (e) {
-      _this.events.emit("connected", e.track);
+      if (_this.onConnected) {
+        _this.onConnected(e.track);
+      }
     });
     /**
      * Handles ICE candidate generation from the local RTCPeerConnection.
@@ -472,16 +528,16 @@ var WsJsepProtocol = exports["default"] = /*#__PURE__*/function () {
       }
     });
     /**
-     * Disconnects both the WebSocket signaling connection and the WebRTC PeerConnection.
+     * Cleans up the current connection's WebSocket and PeerConnection state,
+     * but does not mark the driver as permanently disconnected or trigger
+     * the onDisconnected callback. Used during reconnection.
+     *
+     * @private
      */
-    (0, _defineProperty2["default"])(this, "disconnect", function () {
-      _this.connected = false;
-
-      // Clear out signaling queue so we don't process stale messages later
+    (0, _defineProperty2["default"])(this, "_disconnectState", function () {
       _this.signalQueue = [];
       _this.isProcessingSignal = false;
       if (_this.ws) {
-        // Unbind handlers so close/error events don't trigger recursively
         _this.ws.onclose = null;
         _this.ws.onerror = null;
         _this.ws.onmessage = null;
@@ -495,7 +551,21 @@ var WsJsepProtocol = exports["default"] = /*#__PURE__*/function () {
       _this.pendingCandidates = [];
       _this.remoteDescriptionSet = false;
       _this.event_forwarders = {};
-      _this.events.emit("disconnected", _this);
+    });
+    /**
+     * Disconnects both the WebSocket signaling connection and the WebRTC PeerConnection.
+     */
+    (0, _defineProperty2["default"])(this, "disconnect", function () {
+      _this.connected = false;
+      if (_this.reconnectTimeoutId) {
+        clearTimeout(_this.reconnectTimeoutId);
+        _this.reconnectTimeoutId = null;
+      }
+      _this.reconnectAttempts = 0;
+      _this._disconnectState();
+      if (_this.onDisconnected) {
+        _this.onDisconnected(_this);
+      }
     });
     /**
      * Fully cleans up signaling and WebRTC state.
@@ -509,7 +579,10 @@ var WsJsepProtocol = exports["default"] = /*#__PURE__*/function () {
     this.config = _objectSpread({
       enableLogging: false
     }, _config);
-    this.events = new _events.EventEmitter();
+    this.onError = this.config.onError;
+    this.maxReconnectAttempts = (_this$config$maxRecon = this.config.maxReconnectAttempts) !== null && _this$config$maxRecon !== void 0 ? _this$config$maxRecon : 5;
+    this.reconnectDelay = (_this$config$reconnec = this.config.reconnectDelay) !== null && _this$config$reconnec !== void 0 ? _this$config$reconnec : 1000;
+    this.reconnectBackoffFactor = (_this$config$reconnec2 = this.config.reconnectBackoffFactor) !== null && _this$config$reconnec2 !== void 0 ? _this$config$reconnec2 : 2;
     this.connected = false;
     this.event_forwarders = {};
     this.peerConnection = null;
@@ -522,6 +595,14 @@ var WsJsepProtocol = exports["default"] = /*#__PURE__*/function () {
     // Signaling message queue to prevent concurrent mutations
     this.signalQueue = [];
     this.isProcessingSignal = false;
+
+    // Callbacks set during startStream
+    this.onConnected = null;
+    this.onDisconnected = null;
+
+    // Reconnection state
+    this.reconnectAttempts = 0;
+    this.reconnectTimeoutId = null;
   }
   (0, _createClass2["default"])(WsJsepProtocol, [{
     key: "send",

@@ -31,7 +31,7 @@ var DEFAULT_HEIGHT = 2424;
  * You usually want to wrap a EmulatorRtcview, or EmulatorPngView in it.
  */
 function withMouseKeyHandler(WrappedComponent) {
-  var MouseKeyHandler = function MouseKeyHandler(props) {
+  var MouseKeyHandler = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
     var statusUrl = props.statusUrl,
       auth = props.auth,
       jsep = props.jsep,
@@ -59,6 +59,14 @@ function withMouseKeyHandler(WrappedComponent) {
     if (!statusRef.current) {
       statusRef.current = new _emulator_status["default"](statusUrl, auth);
     }
+    (0, _react.useImperativeHandle)(ref, function () {
+      return {
+        scaleCoordinates: scaleCoordinates,
+        setDeviceWidth: setDeviceWidth,
+        setDeviceHeight: setDeviceHeight,
+        handlerRef: handlerRef
+      };
+    });
     (0, _react.useEffect)(function () {
       statusRef.current.updateStatus(function (state) {
         setDeviceWidth(parseInt(state.hardwareConfig["hw.lcd.width"]) || DEFAULT_WIDTH);
@@ -129,10 +137,13 @@ function withMouseKeyHandler(WrappedComponent) {
         mouseButton = currentMouse.mouseButton,
         xp = currentMouse.xp,
         yp = currentMouse.yp;
-      var request = new _emulator_controller_pb["default"].MouseEvent();
       var _scaleCoordinates = scaleCoordinates(xp, yp),
         x = _scaleCoordinates.x,
         y = _scaleCoordinates.y;
+      if (x < 0 || y < 0) {
+        return;
+      }
+      var request = new _emulator_controller_pb["default"].MouseEvent();
       request.setX(x);
       request.setY(y);
       request.setButtons(mouseDown ? mouseButton : 0);
@@ -210,8 +221,9 @@ function withMouseKeyHandler(WrappedComponent) {
     var setTouchCoordinates = function setTouchCoordinates(type, touches, minForce, maxForce) {
       // We need to calculate the offset of the touch events.
       var rect = handlerRef.current.getBoundingClientRect();
-      var touchesToSend = Object.keys(touches).map(function (index) {
-        var touch = touches[index];
+      var touchesToSend = [];
+      for (var i = 0; i < touches.length; i++) {
+        var touch = touches[i];
         var clientX = touch.clientX,
           clientY = touch.clientY,
           identifier = touch.identifier,
@@ -225,6 +237,9 @@ function withMouseKeyHandler(WrappedComponent) {
           y = _scaleCoordinates2.y,
           scaleX = _scaleCoordinates2.scaleX,
           scaleY = _scaleCoordinates2.scaleY;
+        if (x < 0 || y < 0) {
+          continue;
+        }
         var scaledRadiusX = 2 * radiusX * scaleX;
         var scaledRadiusY = 2 * radiusY * scaleY;
         var protoTouch = new _emulator_controller_pb["default"].Touch();
@@ -237,8 +252,11 @@ function withMouseKeyHandler(WrappedComponent) {
         protoTouch.setPressure(MT_PRESSURE);
         protoTouch.setTouchMajor(Math.max(scaledRadiusX, scaledRadiusY) | 0);
         protoTouch.setTouchMinor(Math.min(scaledRadiusX, scaledRadiusY) | 0);
-        return protoTouch;
-      });
+        touchesToSend.push(protoTouch);
+      }
+      if (touchesToSend.length === 0) {
+        return;
+      }
 
       // Make the grpc call.
       var requestTouchEvent = new _emulator_controller_pb["default"].TouchEvent();
@@ -279,7 +297,7 @@ function withMouseKeyHandler(WrappedComponent) {
         height: height ? "".concat(height, "px") : "auto"
       }
     }, /*#__PURE__*/_react["default"].createElement(WrappedComponent, props));
-  };
+  });
   MouseKeyHandler.propTypes = {
     /** The REST endpoint to retrieve status */
     statusUrl: _propTypes["default"].string,
