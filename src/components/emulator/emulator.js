@@ -24,7 +24,7 @@ import React, {
 import EmulatorWebrtcView from "./views/webrtc_view.js";
 import withMouseKeyHandler from "./views/event_handler";
 import WsJsepProtocol from "./net/ws_jsep_protocol_driver";
-console.log("Imported WsJsepProtocol class:", WsJsepProtocol);
+import logger from "./net/logger";
 import Proto from "../../proto/emulator_controller_pb";
 
 const RtcView = withMouseKeyHandler(EmulatorWebrtcView);
@@ -90,16 +90,16 @@ const Emulator = forwardRef(
       muted = true,
       volume = 1.0,
       onStateChange = (s) => {
-        console.debug("emulator state: " + s);
+        logger.debug("emulator state: " + s);
       },
       onAudioStateChange = (s) => {
-        console.debug("emulator audio: " + s);
+        logger.debug("emulator audio: " + s);
       },
       width,
       height,
       gps,
       onError = (e) => {
-        console.error(e);
+        logger.error(e);
       },
     },
     ref
@@ -108,11 +108,21 @@ const Emulator = forwardRef(
     const jsep = useRef(null);
     const viewRef = useRef(null);
 
+    const onErrorRef = useRef(onError);
+    useEffect(() => {
+      onErrorRef.current = onError;
+    }, [onError]);
+
     const urls = getUrls(uri);
 
     if (!jsep.current) {
       jsep.current = new WsJsepProtocol(urls.jsep);
-      console.log("Created JSEP:", jsep.current);
+      jsep.current.on("error", (err) => {
+        if (onErrorRef.current) {
+          onErrorRef.current(err);
+        }
+      });
+      logger.info("Created JSEP:", jsep.current);
     }
 
     useEffect(() => {
@@ -166,7 +176,7 @@ const Emulator = forwardRef(
       onAudioStateChange(s);
     };
 
-    console.log(`render ${width}x${height}`);
+    logger.debug(`render ${width}x${height}`);
     return (
       <RtcView
         ref={viewRef}

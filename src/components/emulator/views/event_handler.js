@@ -17,6 +17,10 @@ import PropTypes from "prop-types";
 import React from "react";
 import Proto from "../../../proto/emulator_controller_pb";
 import EmulatorStatus from "../net/emulator_status";
+import logger from "../net/logger";
+
+const DEFAULT_WIDTH = 1080;
+const DEFAULT_HEIGHT = 2424;
 
 /**
  * A handler that extends a view to send key/mouse events to the emulator.
@@ -33,8 +37,8 @@ export default function withMouseKeyHandler(WrappedComponent) {
     constructor(props) {
       super(props);
       this.state = {
-        deviceHeight: 1920,
-        deviceWidth: 1080,
+        deviceHeight: DEFAULT_HEIGHT,
+        deviceWidth: DEFAULT_WIDTH,
         mouse: {
           xp: 0,
           yp: 0,
@@ -65,8 +69,8 @@ export default function withMouseKeyHandler(WrappedComponent) {
     getScreenSize() {
       this.status.updateStatus((state) => {
         this.setState({
-          deviceWidth: parseInt(state.hardwareConfig["hw.lcd.width"]) || 1080,
-          deviceHeight: parseInt(state.hardwareConfig["hw.lcd.height"]) || 1920,
+          deviceWidth: parseInt(state.hardwareConfig["hw.lcd.width"]) || DEFAULT_WIDTH,
+          deviceHeight: parseInt(state.hardwareConfig["hw.lcd.height"]) || DEFAULT_HEIGHT,
         });
       });
     }
@@ -75,19 +79,74 @@ export default function withMouseKeyHandler(WrappedComponent) {
       e.preventDefault();
     };
 
+    /**
+     * Translates and scales HTML coordinates (xp, yp) from the event handler's
+     * container element to the emulator's internal device coordinate system.
+     * 
+     * This method accounts for letterboxing or pillarboxing that occurs when
+     * the container's aspect ratio differs from the emulator's native screen aspect ratio,
+     * ensuring that clicks on black borders are ignored and clicks on the active area
+     * are correctly mapped.
+     *
+     * @param {number} xp The x-coordinate relative to the event handler container's top-left corner.
+     * @param {number} yp The y-coordinate relative to the event handler container's top-left corner.
+     * @returns {Object} An object containing the mapped coordinates:
+     *                  - x: The scaled x-coordinate on the emulator device (or -1 if invalid/out of bounds).
+     *                  - y: The scaled y-coordinate on the emulator device (or -1 if invalid/out of bounds).
+     *                  - scaleX: The scaling factor applied to the x-axis.
+     *                  - scaleY: The scaling factor applied to the y-axis.
+     */
     scaleCoordinates = (xp, yp) => {
-      // It is totally possible that we send clicks that are offscreen..
       const { deviceWidth, deviceHeight } = this.state;
       const { clientHeight, clientWidth } = this.handler.current;
-      const scaleX = deviceWidth / clientWidth;
-      const scaleY = deviceHeight / clientHeight;
-      const x = Math.round(xp * scaleX);
-      const y = Math.round(yp * scaleY);
 
-      if (isNaN(x) || isNaN(y)) {
-        console.log("Ignoring: x: " + x + ", y:" + y);
-        return { x: -1, y: -1 };
+      const deviceRatio = deviceWidth / deviceHeight;
+      const containerRatio = clientWidth / clientHeight;
+
+      let renderedWidth = clientWidth;
+      let renderedHeight = clientHeight;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      if (containerRatio > deviceRatio) {
+        // Pillarboxed (bars on left and right)
+        renderedWidth = clientHeight * deviceRatio;
+        offsetX = (clientWidth - renderedWidth) / 2;
+      } else {
+        // Letterboxed (bars on top and bottom)
+        renderedHeight = clientWidth / deviceRatio;
+        offsetY = (clientHeight - renderedHeight) / 2;
       }
+
+      // Adjust coordinate relative to the actual rendered video area
+      const adjustedXp = xp - offsetX;
+      const adjustedYp = yp - offsetY;
+
+      const scaleX = deviceWidth / renderedWidth;
+      const scaleY = deviceHeight / renderedHeight;
+
+      const x = Math.round(adjustedXp * scaleX);
+      const y = Math.round(adjustedYp * scaleY);
+
+      logger.debug(
+        `scaleCoordinates: input(${xp}, ${yp}), container(${clientWidth}x${clientHeight}), ` +
+        `device(${deviceWidth}x${deviceHeight}), offset(${Math.round(offsetX)}, ${Math.round(offsetY)}), ` +
+        `adjusted(${Math.round(adjustedXp)}, ${Math.round(adjustedYp)}), scale(${scaleX.toFixed(3)}, ${scaleY.toFixed(3)}), output(${x}, ${y})`
+      );
+
+      // Guard against out of bounds or division by zero
+      if (
+        isNaN(x) ||
+        isNaN(y) ||
+        adjustedXp < 0 ||
+        adjustedXp > renderedWidth ||
+        adjustedYp < 0 ||
+        adjustedYp > renderedHeight
+      ) {
+        logger.debug("Ignoring out of bounds or invalid click: x: " + x + ", y:" + y);
+        return { x: -1, y: -1, scaleX, scaleY };
+      }
+
       return { x: x, y: y, scaleX: scaleX, scaleY: scaleY };
     };
 
@@ -125,12 +184,14 @@ export default function withMouseKeyHandler(WrappedComponent) {
 
     // Properly handle the mouse events.
     handleMouseDown = (e) => {
-      const { offsetX, offsetY } = e.nativeEvent;
+      const rect = this.handler.current ? this.handler.current.getBoundingClientRect() : null;
+      const xp = rect && rect.width > 0 ? e.clientX - rect.left : e.nativeEvent.offsetX || 0;
+      const yp = rect && rect.height > 0 ? e.clientY - rect.top : e.nativeEvent.offsetY || 0;
       this.setState(
         {
           mouse: {
-            xp: offsetX,
-            yp: offsetY,
+            xp: xp,
+            yp: yp,
             mouseDown: true,
             // In browser's MouseEvent.button property,
             // 0 stands for left button and 2 stands for right button.
@@ -142,10 +203,12 @@ export default function withMouseKeyHandler(WrappedComponent) {
     };
 
     handleMouseUp = (e) => {
-      const { offsetX, offsetY } = e.nativeEvent;
+      const rect = this.handler.current ? this.handler.current.getBoundingClientRect() : null;
+      const xp = rect && rect.width > 0 ? e.clientX - rect.left : e.nativeEvent.offsetX || 0;
+      const yp = rect && rect.height > 0 ? e.clientY - rect.top : e.nativeEvent.offsetY || 0;
       this.setState(
         {
-          mouse: { xp: offsetX, yp: offsetY, mouseDown: false, mouseButton: 0 },
+          mouse: { xp: xp, yp: yp, mouseDown: false, mouseButton: 0 },
         },
         this.setMouseCoordinates
       );
@@ -155,10 +218,12 @@ export default function withMouseKeyHandler(WrappedComponent) {
       // Let's not overload the endpoint with useless events.
       if (!this.state.mouse.mouseDown) return;
 
-      const { offsetX, offsetY } = e.nativeEvent;
+      const rect = this.handler.current ? this.handler.current.getBoundingClientRect() : null;
+      const xp = rect && rect.width > 0 ? e.clientX - rect.left : e.nativeEvent.offsetX || 0;
+      const yp = rect && rect.height > 0 ? e.clientY - rect.top : e.nativeEvent.offsetY || 0;
       var mouse = this.state.mouse;
-      mouse.xp = offsetX;
-      mouse.yp = offsetY;
+      mouse.xp = xp;
+      mouse.yp = yp;
       this.setState({ mouse: mouse }, this.setMouseCoordinates);
     };
 
@@ -237,6 +302,7 @@ export default function withMouseKeyHandler(WrappedComponent) {
     };
 
     render() {
+      const { width, height } = this.props;
       return (
         <div /* handle interaction */
           onTouchStart={this.handleTouch(0.01, 1.0)}
@@ -259,7 +325,8 @@ export default function withMouseKeyHandler(WrappedComponent) {
             padding: "0",
             border: "0",
             display: "inline-block",
-            width: "100%",
+            width: width ? `${width}px` : "100%",
+            height: height ? `${height}px` : "auto",
           }}
         >
           <WrappedComponent {...this.props} />

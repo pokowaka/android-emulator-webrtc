@@ -15,6 +15,7 @@
  */
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
+import logger from "../net/logger";
 
 const EmulatorWebrtcView = ({
   jsep,
@@ -23,6 +24,8 @@ const EmulatorWebrtcView = ({
   muted,
   volume,
   onError,
+  width,
+  height,
 }) => {
   const [audio, setAudio] = useState(false);
   const videoRef = useRef(null);
@@ -75,7 +78,7 @@ const EmulatorWebrtcView = ({
     if (possiblePromise) {
       possiblePromise
         .then((_) => {
-          console.debug("Automatic playback started!");
+          logger.debug("Automatic playback started!");
         })
         .catch((error) => {
           // Notify listeners that we cannot start.
@@ -110,8 +113,8 @@ const EmulatorWebrtcView = ({
       style={{
         display: "block",
         position: "relative",
-        width: "100%",
-        height: "100%",
+        width: width ? `${width}px` : "100%",
+        height: height ? `${height}px` : "100%",
         objectFit: "contain",
         objectPosition: "center",
       }}
@@ -130,12 +133,14 @@ EmulatorWebrtcView.propTypes = {
   muted: PropTypes.bool,
   volume: PropTypes.number,
   onError: PropTypes.func,
+  width: PropTypes.number,
+  height: PropTypes.number,
 };
 
 EmulatorWebrtcView.defaultProps = {
   muted: true,
   volume: 1.0,
-  onError: (e) => console.error("WebRTC error: " + e),
+  onError: (e) => logger.error("WebRTC error: " + e),
 };
 
 export default EmulatorWebrtcView;

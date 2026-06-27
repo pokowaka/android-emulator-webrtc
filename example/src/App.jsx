@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Emulator } from '../../src';
 
 function App() {
-  const [uri, setUri] = useState('localhost:8080');
+  const [uri, setUri] = useState(window.location.host);
   const [connected, setConnected] = useState(false);
   const [gps, setGps] = useState({ latitude: 37.4220, longitude: -122.0841 });
   const [inputGps, setInputGps] = useState({ lat: '37.4220', lng: '-122.0841' });

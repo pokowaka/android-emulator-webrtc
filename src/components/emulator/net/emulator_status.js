@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import logger from "./logger";
+
 /**
  * Gets the status of the emulator, parsing the hardware config into something
  * easy to digest.
@@ -78,7 +80,7 @@ class EmulatorStatus {
         fnNotify(this.status);
       })
       .catch((err) => {
-        console.error("Failed to get emulator status:", err);
+        logger.error("Failed to get emulator status:", err);
       });
   };
 }

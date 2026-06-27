@@ -6,12 +6,12 @@
     "build": "babel src -d dist",
     "test": "jest"
   },
-
   "jest": {
     "verbose": true
   },
   "dependencies": {
     "google-protobuf": "^3.21.2",
+    "loglevel": "^1.9.2",
     "prop-types": "^15.8.1"
   },
   "peerDependencies": {
