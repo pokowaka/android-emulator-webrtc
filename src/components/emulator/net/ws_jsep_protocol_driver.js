@@ -28,7 +28,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { EventEmitter } from "events";
 import logger from "./logger";
 
 /**
@@ -45,6 +44,7 @@ export default class WsJsepProtocol {
    * @param {Object} [emulator=null] Fallback emulator controller for sending events when WebRTC is unavailable.
    * @param {Object} [config={}] Configuration options.
    * @param {boolean} [config.enableLogging=false] Whether verbose signaling logging is enabled.
+   * @param {function} [config.onError] Callback invoked when an error occurs.
    */
   constructor(wsUrl, emulator = null, config = {}) {
     this.wsUrl = wsUrl;
@@ -53,7 +53,7 @@ export default class WsJsepProtocol {
       enableLogging: false,
       ...config
     };
-    this.events = new EventEmitter();
+    this.onError = this.config.onError;
     this.connected = false;
     this.event_forwarders = {};
     this.peerConnection = null;
@@ -66,24 +66,25 @@ export default class WsJsepProtocol {
     // Signaling message queue to prevent concurrent mutations
     this.signalQueue = [];
     this.isProcessingSignal = false;
-  }
 
-  /**
-   * Registers an event listener on the internal EventEmitter.
-   *
-   * @param {string} name Event name (e.g., "connected", "disconnected", "error").
-   * @param {function} fn Callback function.
-   */
-  on = (name, fn) => {
-    this.events.on(name, fn);
-  };
+    // Callbacks set during startStream
+    this.onConnected = null;
+    this.onDisconnected = null;
+  }
 
   /**
    * Establishes the WebSocket connection and starts the signaling process.
    * Cleans up any existing connection beforehand.
+   *
+   * @param {Object} [callbacks] Callbacks for stream lifecycle events.
+   * @param {function(MediaStreamTrack): void} [callbacks.onConnected] Called when a media track is received.
+   * @param {function(): void} [callbacks.onDisconnected] Called when the stream is disconnected.
    */
-  startStream = () => {
+  startStream = (callbacks = {}) => {
     this.cleanup();
+
+    this.onConnected = callbacks.onConnected;
+    this.onDisconnected = callbacks.onDisconnected;
 
     this.ws = new WebSocket(this.wsUrl);
     this.ws.onmessage = this._handleWsMessage;
@@ -145,7 +146,9 @@ export default class WsJsepProtocol {
    */
   _handleWsError = (error) => {
     logger.error("WebSocket error:", error);
-    this.events.emit("error", error);
+    if (this.onError) {
+      this.onError(error);
+    }
     this.disconnect();
   };
 
@@ -231,7 +234,9 @@ export default class WsJsepProtocol {
    * @param {RTCTrackEvent} e The track event.
    */
   _handlePeerConnectionTrack = (e) => {
-    this.events.emit("connected", e.track);
+    if (this.onConnected) {
+      this.onConnected(e.track);
+    }
   };
 
   /**
@@ -427,7 +432,9 @@ export default class WsJsepProtocol {
     this.remoteDescriptionSet = false;
     this.event_forwarders = {};
 
-    this.events.emit("disconnected", this);
+    if (this.onDisconnected) {
+      this.onDisconnected(this);
+    }
   };
 
   /**

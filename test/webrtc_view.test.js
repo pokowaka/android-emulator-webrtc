@@ -26,7 +26,6 @@ describe("EmulatorWebrtcView", () => {
 
   beforeEach(() => {
     mockJsep = {
-      on: jest.fn(),
       startStream: jest.fn(),
       disconnect: jest.fn(),
     };

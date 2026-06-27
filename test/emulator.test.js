@@ -26,7 +26,6 @@ import WsJsepProtocol from "../src/components/emulator/net/ws_jsep_protocol_driv
 
 const mockDisconnect = jest.fn();
 const mockStartStream = jest.fn();
-const mockOn = jest.fn();
 const mockSend = jest.fn();
 const mockCleanup = jest.fn();
 
@@ -45,7 +44,6 @@ describe("The emulator", () => {
       return {
         disconnect: mockDisconnect,
         startStream: mockStartStream,
-        on: mockOn,
         send: mockSend,
         cleanup: mockCleanup,
       };
@@ -53,7 +51,6 @@ describe("The emulator", () => {
 
     mockDisconnect.mockClear();
     mockStartStream.mockClear();
-    mockOn.mockClear();
     mockSend.mockClear();
     mockCleanup.mockClear();
 
@@ -80,12 +77,20 @@ describe("The emulator", () => {
 
   test("Creates WsJsepProtocol with correct URL", async () => {
     await renderEmulator(<Emulator uri="localhost:8080" width={300} height={300} />);
-    expect(WsJsepProtocol).toHaveBeenCalledWith("ws://localhost:8080/api/v1/emulator/ws-jsep");
+    expect(WsJsepProtocol).toHaveBeenCalledWith(
+      "ws://localhost:8080/api/v1/emulator/ws-jsep",
+      null,
+      expect.objectContaining({ onError: expect.any(Function) })
+    );
   });
 
   test("Creates WsJsepProtocol with correct URL when HTTPS is used", async () => {
     await renderEmulator(<Emulator uri="https://example.com" width={300} height={300} />);
-    expect(WsJsepProtocol).toHaveBeenCalledWith("wss://example.com/api/v1/emulator/ws-jsep");
+    expect(WsJsepProtocol).toHaveBeenCalledWith(
+      "wss://example.com/api/v1/emulator/ws-jsep",
+      null,
+      expect.objectContaining({ onError: expect.any(Function) })
+    );
   });
 
   test("Tries to establish a WebRTC connection", async () => {

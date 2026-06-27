@@ -111,9 +111,10 @@ const EmulatorWebrtcView = ({
   };
 
   useEffect(() => {
-    jsep.on("connected", onConnect);
-    jsep.on("disconnected", onDisconnect);
-    jsep.startStream()
+    jsep.startStream({
+      onConnected: onConnect,
+      onDisconnected: onDisconnect,
+    });
 
     setConnect("connecting");
 

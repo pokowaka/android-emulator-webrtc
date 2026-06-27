@@ -125,11 +125,12 @@ const Emulator = forwardRef(
     const urls = getUrls(uri);
 
     if (!jsep.current) {
-      jsep.current = new WsJsepProtocol(urls.jsep);
-      jsep.current.on("error", (err) => {
-        if (onErrorRef.current) {
-          onErrorRef.current(err);
-        }
+      jsep.current = new WsJsepProtocol(urls.jsep, null, {
+        onError: (err) => {
+          if (onErrorRef.current) {
+            onErrorRef.current(err);
+          }
+        },
       });
       logger.info("Created JSEP:", jsep.current);
     }
