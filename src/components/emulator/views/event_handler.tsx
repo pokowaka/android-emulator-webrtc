@@ -36,6 +36,25 @@ interface MouseState {
 }
 
 /**
+ * Scales an axis to linux input codes that the emulator understands.
+ *
+ * @param value The value to scale.
+ * @param minIn The minimum input value.
+ * @param maxIn The maximum input value.
+ * @returns The scaled value mapped to the EV_ABS range.
+ */
+const scaleAxis = (value: number, minIn: number, maxIn: number) => {
+  const minOut = 0x0; // EV_ABS_MIN
+  const maxOut = 0x7fff; // EV_ABS_MAX
+  const rangeOut = maxOut - minOut;
+  const rangeIn = maxIn - minIn;
+  if (rangeIn < 1) {
+    return minOut + rangeOut / 2;
+  }
+  return (((value - minIn) * rangeOut) / rangeIn + minOut) | 0;
+};
+
+/**
  * A handler that extends a view to send key/mouse events to the emulator.
  * It wraps the inner component in a div, and will use the jsep handler
  * to send key/mouse/touch events over the proper channel.
@@ -77,9 +96,9 @@ export default function withMouseKeyHandler<P extends object>(
       });
     }, [statusUrl, auth]);
 
-    const onContextMenu = (e: React.MouseEvent) => {
+    const onContextMenu = useCallback((e: React.MouseEvent) => {
       e.preventDefault();
-    };
+    }, []);
 
     /**
      * Translates and scales HTML coordinates (xp, yp) from the event handler's
@@ -94,7 +113,7 @@ export default function withMouseKeyHandler<P extends object>(
      * @param yp The vertical coordinate relative to the container element.
      * @returns An object containing the scaled x/y coordinates and scaling factors.
      */
-    const scaleCoordinates = (xp: number, yp: number) => {
+    const scaleCoordinates = useCallback((xp: number, yp: number) => {
       const { clientHeight, clientWidth } = handlerRef.current!;
 
       const deviceRatio = deviceWidth / deviceHeight;
@@ -145,9 +164,9 @@ export default function withMouseKeyHandler<P extends object>(
       }
 
       return { x, y, scaleX, scaleY };
-    };
+    }, [deviceWidth, deviceHeight]);
 
-    const sendMouseCoordinates = (currentMouse: MouseState) => {
+    const sendMouseCoordinates = useCallback((currentMouse: MouseState) => {
       const { mouseDown, mouseButton, xp, yp } = currentMouse;
       const { x, y } = scaleCoordinates(xp, yp);
       if (x < 0 || y < 0) {
@@ -158,7 +177,7 @@ export default function withMouseKeyHandler<P extends object>(
       request.setY(y);
       request.setButtons(mouseDown ? mouseButton : 0);
       jsep.send("mouse", request);
-    };
+    }, [scaleCoordinates, jsep]);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
       // Disable jumping to next control when pressing the space bar.
@@ -182,15 +201,15 @@ export default function withMouseKeyHandler<P extends object>(
       jsep.send("keyboard", request);
     }, [jsep]);
 
-    const getRelativeCoords = (e: React.MouseEvent) => {
+    const getRelativeCoords = useCallback((e: React.MouseEvent) => {
       const rect = handlerRef.current ? handlerRef.current.getBoundingClientRect() : null;
       const xp = rect && rect.width > 0 ? e.clientX - rect.left : e.nativeEvent.offsetX || 0;
       const yp = rect && rect.height > 0 ? e.clientY - rect.top : e.nativeEvent.offsetY || 0;
       return { xp, yp };
-    };
+    }, []);
 
     // Properly handle the mouse events.
-    const handleMouseDown = (e: React.MouseEvent) => {
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
       const { xp, yp } = getRelativeCoords(e);
       const newMouse = {
         xp,
@@ -202,16 +221,16 @@ export default function withMouseKeyHandler<P extends object>(
       };
       setMouse(newMouse);
       sendMouseCoordinates(newMouse);
-    };
+    }, [getRelativeCoords, sendMouseCoordinates]);
 
-    const handleMouseUp = (e: React.MouseEvent) => {
+    const handleMouseUp = useCallback((e: React.MouseEvent) => {
       const { xp, yp } = getRelativeCoords(e);
       const newMouse = { xp, yp, mouseDown: false, mouseButton: 0 };
       setMouse(newMouse);
       sendMouseCoordinates(newMouse);
-    };
+    }, [getRelativeCoords, sendMouseCoordinates]);
 
-    const handleMouseMove = (e: React.MouseEvent) => {
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
       // Let's not overload the endpoint with useless events.
       if (!mouse.mouseDown) return;
 
@@ -219,28 +238,9 @@ export default function withMouseKeyHandler<P extends object>(
       const newMouse = { ...mouse, xp, yp };
       setMouse(newMouse);
       sendMouseCoordinates(newMouse);
-    };
+    }, [mouse, getRelativeCoords, sendMouseCoordinates]);
 
-    /**
-     * Scales an axis to linux input codes that the emulator understands.
-     *
-     * @param value The value to scale.
-     * @param minIn The minimum input value.
-     * @param maxIn The maximum input value.
-     * @returns The scaled value mapped to the EV_ABS range.
-     */
-    const scaleAxis = (value: number, minIn: number, maxIn: number) => {
-      const minOut = 0x0; // EV_ABS_MIN
-      const maxOut = 0x7fff; // EV_ABS_MAX
-      const rangeOut = maxOut - minOut;
-      const rangeIn = maxIn - minIn;
-      if (rangeIn < 1) {
-        return minOut + rangeOut / 2;
-      }
-      return (((value - minIn) * rangeOut) / rangeIn + minOut) | 0;
-    };
-
-    const setTouchCoordinates = (type: string, touches: TouchList, minForce: number, maxForce: number) => {
+    const setTouchCoordinates = useCallback((type: string, touches: TouchList, minForce: number, maxForce: number) => {
       // We need to calculate the offset of the touch events.
       const rect = handlerRef.current!.getBoundingClientRect();
       const touchesToSend: any[] = [];
@@ -285,7 +285,7 @@ export default function withMouseKeyHandler<P extends object>(
       const requestTouchEvent = new Proto.TouchEvent();
       requestTouchEvent.setTouchesList(touchesToSend);
       jsep.send("touch", requestTouchEvent);
-    };
+    }, [scaleCoordinates, jsep]);
 
     const handleTouchActive = useCallback((e: React.TouchEvent) => {
       if (e.cancelable) {
@@ -297,7 +297,7 @@ export default function withMouseKeyHandler<P extends object>(
         0.01,
         1.0
       );
-    }, [jsep, deviceWidth, deviceHeight]);
+    }, [setTouchCoordinates]);
 
     const handleTouchInactive = useCallback((e: React.TouchEvent) => {
       if (e.cancelable) {
@@ -309,11 +309,11 @@ export default function withMouseKeyHandler<P extends object>(
         0.0,
         0.0
       );
-    }, [jsep, deviceWidth, deviceHeight]);
+    }, [setTouchCoordinates]);
 
-    const onMouseOut = (e: React.MouseEvent) => {
+    const onMouseOut = useCallback((e: React.MouseEvent) => {
       handleMouseUp(e);
-    };
+    }, [handleMouseUp]);
 
     return (
       <div
