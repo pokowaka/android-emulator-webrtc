@@ -205,8 +205,8 @@ const Emulator = forwardRef<EmulatorRef, EmulatorProps>(
 
     useImperativeHandle(ref, () => ({
       sendKey: (key) => {
-        const request = new (Proto as any).KeyboardEvent();
-        request.setEventtype((Proto as any).KeyboardEvent.KeyEventType.KEYPRESS);
+        const request = new Proto.KeyboardEvent();
+        request.setEventtype(Proto.KeyboardEvent.KeyEventType.KEYPRESS);
         request.setKey(key);
         jsep.current?.send("keyboard", request);
       },

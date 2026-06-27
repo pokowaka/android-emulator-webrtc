@@ -153,7 +153,7 @@ export default function withMouseKeyHandler<P extends object>(
       if (x < 0 || y < 0) {
         return;
       }
-      const request = new (Proto as any).MouseEvent();
+      const request = new Proto.MouseEvent();
       request.setX(x);
       request.setY(y);
       request.setButtons(mouseDown ? mouseButton : 0);
@@ -165,8 +165,8 @@ export default function withMouseKeyHandler<P extends object>(
       if (e.keyCode === 32) {
         e.preventDefault();
       }
-      const request = new (Proto as any).KeyboardEvent();
-      request.setEventtype((Proto as any).KeyboardEvent.KeyEventType.KEYDOWN);
+      const request = new Proto.KeyboardEvent();
+      request.setEventtype(Proto.KeyboardEvent.KeyEventType.KEYDOWN);
       request.setKey(e.key);
       jsep.send("keyboard", request);
     }, [jsep]);
@@ -176,8 +176,8 @@ export default function withMouseKeyHandler<P extends object>(
       if (e.keyCode === 32) {
         e.preventDefault();
       }
-      const request = new (Proto as any).KeyboardEvent();
-      request.setEventtype((Proto as any).KeyboardEvent.KeyEventType.KEYUP);
+      const request = new Proto.KeyboardEvent();
+      request.setEventtype(Proto.KeyboardEvent.KeyEventType.KEYUP);
       request.setKey(e.key);
       jsep.send("keyboard", request);
     }, [jsep]);
@@ -258,7 +258,7 @@ export default function withMouseKeyHandler<P extends object>(
         const scaledRadiusX = 2 * radiusX * scaleX;
         const scaledRadiusY = 2 * radiusY * scaleY;
 
-        const protoTouch = new (Proto as any).Touch();
+        const protoTouch = new Proto.Touch();
         protoTouch.setX(x | 0);
         protoTouch.setY(y | 0);
         protoTouch.setIdentifier(identifier);
@@ -281,7 +281,7 @@ export default function withMouseKeyHandler<P extends object>(
       }
 
       // Make the grpc call.
-      const requestTouchEvent = new (Proto as any).TouchEvent();
+      const requestTouchEvent = new Proto.TouchEvent();
       requestTouchEvent.setTouchesList(touchesToSend);
       jsep.send("touch", requestTouchEvent);
     };
