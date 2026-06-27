@@ -30,6 +30,11 @@ jobs:
           node-version: 22
           cache: 'npm'
 
+      - name: Configure Public NPM Registry
+        run: |
+          echo "registry=https://registry.npmjs.org/" > .npmrc
+          echo "registry=https://registry.npmjs.org/" > example/.npmrc
+
       - name: Install Root Dependencies
         run: npm ci
 
