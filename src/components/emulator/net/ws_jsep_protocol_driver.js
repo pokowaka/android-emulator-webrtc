@@ -45,6 +45,9 @@ export default class WsJsepProtocol {
    * @param {Object} [config={}] Configuration options.
    * @param {boolean} [config.enableLogging=false] Whether verbose signaling logging is enabled.
    * @param {function} [config.onError] Callback invoked when an error occurs.
+   * @param {number} [config.maxReconnectAttempts=5] Maximum number of reconnection attempts.
+   * @param {number} [config.reconnectDelay=1000] Initial delay for reconnection in milliseconds.
+   * @param {number} [config.reconnectBackoffFactor=2] Exponential backoff factor.
    */
   constructor(wsUrl, emulator = null, config = {}) {
     this.wsUrl = wsUrl;
@@ -54,6 +57,10 @@ export default class WsJsepProtocol {
       ...config
     };
     this.onError = this.config.onError;
+    this.maxReconnectAttempts = this.config.maxReconnectAttempts ?? 5;
+    this.reconnectDelay = this.config.reconnectDelay ?? 1000;
+    this.reconnectBackoffFactor = this.config.reconnectBackoffFactor ?? 2;
+
     this.connected = false;
     this.event_forwarders = {};
     this.peerConnection = null;
@@ -70,6 +77,10 @@ export default class WsJsepProtocol {
     // Callbacks set during startStream
     this.onConnected = null;
     this.onDisconnected = null;
+
+    // Reconnection state
+    this.reconnectAttempts = 0;
+    this.reconnectTimeoutId = null;
   }
 
   /**
@@ -82,14 +93,60 @@ export default class WsJsepProtocol {
    */
   startStream = (callbacks = {}) => {
     this.cleanup();
+    this.reconnectAttempts = 0;
 
-    this.onConnected = callbacks.onConnected;
-    this.onDisconnected = callbacks.onDisconnected;
+    this.onConnected = callbacks.onConnected || this.onConnected;
+    this.onDisconnected = callbacks.onDisconnected || this.onDisconnected;
+
+    this.connected = true;
+    this._connect();
+  };
+
+  /**
+   * Internal method to establish WebSocket connection.
+   *
+   * @private
+   */
+  _connect = () => {
+    if (this.reconnectTimeoutId) {
+      clearTimeout(this.reconnectTimeoutId);
+      this.reconnectTimeoutId = null;
+    }
 
     this.ws = new WebSocket(this.wsUrl);
     this.ws.onmessage = this._handleWsMessage;
     this.ws.onclose = this._handleWsClose;
     this.ws.onerror = this._handleWsError;
+  };
+
+  /**
+   * Queues a reconnection attempt with exponential backoff.
+   *
+   * @private
+   */
+  _queueReconnect = () => {
+    if (this.reconnectTimeoutId) return;
+
+    this.reconnectAttempts++;
+    if (this.reconnectAttempts > this.maxReconnectAttempts) {
+      logger.error(`Max reconnect attempts (${this.maxReconnectAttempts}) reached. Giving up.`);
+      if (this.onError) {
+        this.onError(new Error("Connection failed: Max reconnect attempts reached."));
+      }
+      this.disconnect();
+      return;
+    }
+
+    const delay = this.reconnectDelay * Math.pow(this.reconnectBackoffFactor, this.reconnectAttempts - 1);
+    logger.info(`Queueing reconnect attempt ${this.reconnectAttempts} in ${delay}ms`);
+
+    this.reconnectTimeoutId = setTimeout(() => {
+      this.reconnectTimeoutId = null;
+      // Partially disconnect to clean up the failed peer connection/websocket,
+      // but keep this.connected = true so we know we want to reconnect.
+      this._disconnectState();
+      this._connect();
+    }, delay);
   };
 
   /**
@@ -135,7 +192,11 @@ export default class WsJsepProtocol {
    */
   _handleWsClose = (event) => {
     logger.debug("WebSocket closed:", event);
-    this.disconnect();
+    if (this.connected) {
+      this._queueReconnect();
+    } else {
+      this.disconnect();
+    }
   };
 
   /**
@@ -146,10 +207,14 @@ export default class WsJsepProtocol {
    */
   _handleWsError = (error) => {
     logger.error("WebSocket error:", error);
-    if (this.onError) {
-      this.onError(error);
+    if (this.connected) {
+      this._queueReconnect();
+    } else {
+      if (this.onError) {
+        this.onError(error);
+      }
+      this.disconnect();
     }
-    this.disconnect();
   };
 
   /**
@@ -406,17 +471,17 @@ export default class WsJsepProtocol {
   }
 
   /**
-   * Disconnects both the WebSocket signaling connection and the WebRTC PeerConnection.
+   * Cleans up the current connection's WebSocket and PeerConnection state,
+   * but does not mark the driver as permanently disconnected or trigger
+   * the onDisconnected callback. Used during reconnection.
+   *
+   * @private
    */
-  disconnect = () => {
-    this.connected = false;
-
-    // Clear out signaling queue so we don't process stale messages later
+  _disconnectState = () => {
     this.signalQueue = [];
     this.isProcessingSignal = false;
 
     if (this.ws) {
-      // Unbind handlers so close/error events don't trigger recursively
       this.ws.onclose = null;
       this.ws.onerror = null;
       this.ws.onmessage = null;
@@ -431,6 +496,21 @@ export default class WsJsepProtocol {
     this.pendingCandidates = [];
     this.remoteDescriptionSet = false;
     this.event_forwarders = {};
+  };
+
+  /**
+   * Disconnects both the WebSocket signaling connection and the WebRTC PeerConnection.
+   */
+  disconnect = () => {
+    this.connected = false;
+
+    if (this.reconnectTimeoutId) {
+      clearTimeout(this.reconnectTimeoutId);
+      this.reconnectTimeoutId = null;
+    }
+    this.reconnectAttempts = 0;
+
+    this._disconnectState();
 
     if (this.onDisconnected) {
       this.onDisconnected(this);
