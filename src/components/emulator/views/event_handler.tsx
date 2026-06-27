@@ -346,5 +346,7 @@ export default function withMouseKeyHandler<P extends object>(
     );
   });
 
+  MouseKeyHandler.displayName = `WithMouseKeyHandler(${WrappedComponent.displayName || WrappedComponent.name || "Component"})`;
+
   return MouseKeyHandler;
 }

@@ -38,7 +38,7 @@ export interface EmulatorController {
 export interface JsepSignal {
   start?: RTCConfiguration;
   type?: "offer" | "answer";
-  sdp?: RTCSessionDescriptionInit;
+  sdp?: RTCSessionDescriptionInit | string;
   candidate?: RTCIceCandidateInit | string;
   bye?: boolean;
 }
@@ -263,8 +263,8 @@ export default class WsJsepProtocol {
       }
       
       if (signal.type === "offer" || signal.type === "answer") {
-        await this._handleSDP(signal); // Pass the whole signal object
-      } else if (signal.sdp && signal.sdp.type) {
+        await this._handleSDP(signal as RTCSessionDescriptionInit); // Pass the whole signal object
+      } else if (signal.sdp && typeof signal.sdp === "object" && signal.sdp.type) {
         await this._handleSDP(signal.sdp); // Pass the nested object
       }
       
