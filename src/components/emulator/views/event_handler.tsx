@@ -8,10 +8,15 @@ const DEFAULT_WIDTH = 1080;
 const DEFAULT_HEIGHT = 2424;
 
 export interface MouseKeyHandlerProps {
+  /** The REST endpoint to retrieve status. */
   statusUrl: string;
+  /** Jsep protocol driver, used to send mouse & touch events. */
   jsep: WsJsepProtocol;
+  /** The authentication service to use. */
   auth?: any;
+  /** The width of the component. */
   width?: number;
+  /** The height of the component. */
   height?: number;
   [key: string]: any;
 }
@@ -88,6 +93,10 @@ export default function withMouseKeyHandler<P extends object>(
      * the container's aspect ratio differs from the emulator's native screen aspect ratio,
      * ensuring that clicks on black borders are ignored and clicks on the active area
      * are correctly mapped.
+     *
+     * @param xp The horizontal coordinate relative to the container element.
+     * @param yp The vertical coordinate relative to the container element.
+     * @returns An object containing the scaled x/y coordinates and scaling factors.
      */
     const scaleCoordinates = (xp: number, yp: number) => {
       const { clientHeight, clientWidth } = handlerRef.current!;
@@ -212,6 +221,11 @@ export default function withMouseKeyHandler<P extends object>(
 
     /**
      * Scales an axis to linux input codes that the emulator understands.
+     *
+     * @param value The value to scale.
+     * @param minIn The minimum input value.
+     * @param maxIn The maximum input value.
+     * @returns The scaled value mapped to the EV_ABS range.
      */
     const scaleAxis = (value: number, minIn: number, maxIn: number) => {
       const minOut = 0x0; // EV_ABS_MIN
