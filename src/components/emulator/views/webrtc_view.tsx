@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import logger from "../net/logger";
+import WsJsepProtocol from "../net/ws_jsep_protocol_driver";
+
+export interface EmulatorWebrtcViewProps {
+  jsep: WsJsepProtocol;
+  onStateChange?: (state: string) => void;
+  onAudioStateChange?: (audio: boolean) => void;
+  muted?: boolean;
+  volume?: number;
+  onError?: (error: Error) => void;
+  width?: number;
+  height?: number;
+}
 
 /**
  * A React component that renders the WebRTC video stream of the emulator.
  * Handles establishing the stream via the JSEP protocol driver and managing
  * local playback (including handling autoplay constraints).
- *
- * @param {Object} props Component properties.
- * @param {Object} props.jsep The JSEP protocol driver instance.
- * @param {function(string): void} [props.onStateChange] Callback for connection state changes ("connecting", "connected", "disconnected").
- * @param {function(boolean): void} [props.onAudioStateChange] Callback when audio track status changes.
- * @param {boolean} [props.muted=true] Whether the audio should be muted.
- * @param {number} [props.volume=1.0] Audio volume (between 0.0 and 1.0).
- * @param {function(Error): void} props.onError Callback invoked on signaling or playback errors.
- * @param {number} [props.width] Component width.
- * @param {number} [props.height] Component height.
  */
-const EmulatorWebrtcView = ({
+const EmulatorWebrtcView: React.FC<EmulatorWebrtcViewProps> = ({
   jsep,
   onStateChange,
   onAudioStateChange,
@@ -42,30 +43,28 @@ const EmulatorWebrtcView = ({
   width,
   height,
 }) => {
-  const [audio, setAudio] = useState(false);
-  const videoRef = useRef(null);
-  const [connect, setConnect] = useState("connecting");
-
+  const [audio, setAudio] = useState<boolean>(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [connect, setConnect] = useState<string>("connecting");
 
   useEffect(() => {
     if (onStateChange) {
       onStateChange(connect);
     }
-  }, [connect]);
-
+  }, [connect, onStateChange]);
 
   useEffect(() => {
     if (onAudioStateChange) {
       onAudioStateChange(audio);
     }
-  }, [audio]);
+  }, [audio, onAudioStateChange]);
 
   const onDisconnect = () => {
     setConnect("disconnected");
     setAudio(false);
   };
 
-  const onConnect = (track) => {
+  const onConnect = (track: MediaStreamTrack) => {
     setConnect("connected");
     const video = videoRef.current;
     if (!video) {
@@ -76,7 +75,7 @@ const EmulatorWebrtcView = ({
     if (!video.srcObject) {
       video.srcObject = new MediaStream();
     }
-    video.srcObject.addTrack(track);
+    (video.srcObject as MediaStream).addTrack(track);
     if (track.kind === "audio") {
       setAudio(true);
     }
@@ -106,7 +105,7 @@ const EmulatorWebrtcView = ({
     safePlay();
   };
 
-  const onContextMenu = (e) => {
+  const onContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
   };
 
@@ -147,16 +146,4 @@ const EmulatorWebrtcView = ({
   );
 };
 
-EmulatorWebrtcView.propTypes = {
-  jsep: PropTypes.object,
-  onStateChange: PropTypes.func,
-  onAudioStateChange: PropTypes.func,
-  muted: PropTypes.bool,
-  volume: PropTypes.number,
-  onError: PropTypes.func,
-  width: PropTypes.number,
-  height: PropTypes.number,
-};
-
 export default EmulatorWebrtcView;
-

@@ -21,7 +21,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import EmulatorWebrtcView from "./views/webrtc_view.js";
+import EmulatorWebrtcView from "./views/webrtc_view";
 import withMouseKeyHandler from "./views/event_handler";
 import WsJsepProtocol from "./net/ws_jsep_protocol_driver";
 import logger from "./net/logger";
