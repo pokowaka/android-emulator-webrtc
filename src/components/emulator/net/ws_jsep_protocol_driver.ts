@@ -13,22 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Copyright 2026 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import logger from "./logger";
+
+export interface WsJsepConfig {
+  enableLogging?: boolean;
+  onError?: (error: Error | Event) => void;
+  maxReconnectAttempts?: number;
+  reconnectDelay?: number;
+  reconnectBackoffFactor?: number;
+  [key: string]: any;
+}
+
+export interface StreamCallbacks {
+  onConnected?: (track: MediaStreamTrack) => void;
+  onDisconnected?: (driver: WsJsepProtocol) => void;
+}
+
+export interface EmulatorController {
+  sendMouse?(msg: any): void;
+  sendKey?(msg: any): void;
+  sendTouch?(msg: any): void;
+}
 
 /**
  * A JSEP protocol driver that uses WebSockets for signaling.
@@ -37,19 +42,39 @@ import logger from "./logger";
  * @class WsJsepProtocol
  */
 export default class WsJsepProtocol {
+  wsUrl: string;
+  emulator: EmulatorController | null;
+  config: WsJsepConfig;
+  onError?: (error: Error | Event) => void;
+  maxReconnectAttempts: number;
+  reconnectDelay: number;
+  reconnectBackoffFactor: number;
+
+  connected: boolean;
+  event_forwarders: Record<string, RTCDataChannel>;
+  peerConnection: RTCPeerConnection | null;
+  ws: WebSocket | null;
+
+  pendingCandidates: any[];
+  remoteDescriptionSet: boolean;
+
+  signalQueue: any[];
+  isProcessingSignal: boolean;
+
+  onConnected: ((track: MediaStreamTrack) => void) | null;
+  onDisconnected: ((driver: WsJsepProtocol) => void) | null;
+
+  reconnectAttempts: number;
+  reconnectTimeoutId: any | null;
+
   /**
    * Creates an instance of WsJsepProtocol.
    *
    * @param {string} wsUrl The WebSocket JSEP signaling URL.
    * @param {Object} [emulator=null] Fallback emulator controller for sending events when WebRTC is unavailable.
    * @param {Object} [config={}] Configuration options.
-   * @param {boolean} [config.enableLogging=false] Whether verbose signaling logging is enabled.
-   * @param {function} [config.onError] Callback invoked when an error occurs.
-   * @param {number} [config.maxReconnectAttempts=5] Maximum number of reconnection attempts.
-   * @param {number} [config.reconnectDelay=1000] Initial delay for reconnection in milliseconds.
-   * @param {number} [config.reconnectBackoffFactor=2] Exponential backoff factor.
    */
-  constructor(wsUrl, emulator = null, config = {}) {
+  constructor(wsUrl: string, emulator: EmulatorController | null = null, config: WsJsepConfig = {}) {
     this.wsUrl = wsUrl;
     this.emulator = emulator;
     this.config = {
@@ -88,10 +113,8 @@ export default class WsJsepProtocol {
    * Cleans up any existing connection beforehand.
    *
    * @param {Object} [callbacks] Callbacks for stream lifecycle events.
-   * @param {function(MediaStreamTrack): void} [callbacks.onConnected] Called when a media track is received.
-   * @param {function(): void} [callbacks.onDisconnected] Called when the stream is disconnected.
    */
-  startStream = (callbacks = {}) => {
+  startStream = (callbacks: StreamCallbacks = {}) => {
     this.cleanup();
     this.reconnectAttempts = 0;
 
@@ -156,7 +179,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {MessageEvent} event The WebSocket message event.
    */
-  _handleWsMessage = (event) => {
+  _handleWsMessage = (event: MessageEvent) => {
     try {
       const signal = JSON.parse(event.data);
       // Push to queue instead of handling immediately
@@ -190,7 +213,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {CloseEvent} event The WebSocket close event.
    */
-  _handleWsClose = (event) => {
+  _handleWsClose = (event: CloseEvent) => {
     logger.debug("WebSocket closed:", event);
     if (this.connected) {
       this._queueReconnect();
@@ -205,7 +228,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {Event} error The WebSocket error event.
    */
-  _handleWsError = (error) => {
+  _handleWsError = (error: Event) => {
     logger.error("WebSocket error:", error);
     if (this.connected) {
       this._queueReconnect();
@@ -223,7 +246,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {Object} signal The JSEP signaling message.
    */
-  _handleSignal = async (signal) => {
+  _handleSignal = async (signal: any) => {
     logger.debug("JSEP << [Received from Server]:", JSON.stringify(signal, null, 2));
     
     try {
@@ -254,8 +277,8 @@ export default class WsJsepProtocol {
    * @private
    * @param {Object} config The signaling start configuration.
    */
-  _handleStart = async (config) => {
-    const localOnlyConfig = {
+  _handleStart = async (config: RTCConfiguration) => {
+    const localOnlyConfig: RTCConfiguration = {
       ...config,
       iceServers: []
     };
@@ -298,7 +321,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {RTCTrackEvent} e The track event.
    */
-  _handlePeerConnectionTrack = (e) => {
+  _handlePeerConnectionTrack = (e: RTCTrackEvent) => {
     if (this.onConnected) {
       this.onConnected(e.track);
     }
@@ -310,7 +333,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {RTCPeerConnectionIceEvent} e The ICE candidate event.
    */
-  _handlePeerIceCandidate = (e) => {
+  _handlePeerIceCandidate = (e: RTCPeerConnectionIceEvent) => {
     if (e.candidate === null) return;
     this._sendJsep({ candidate: e.candidate });
   };
@@ -321,7 +344,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {Event} e The state change event.
    */
-  _handlePeerConnectionStateChange = (e) => {
+  _handlePeerConnectionStateChange = (e: Event) => {
     if (!this.peerConnection) return;
     switch (this.peerConnection.connectionState) {
       case "disconnected":
@@ -337,7 +360,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {RTCDataChannel} channel The data channel.
    */
-  _setupDataChannel = (channel) => {
+  _setupDataChannel = (channel: RTCDataChannel) => {
     this.event_forwarders[channel.label] = channel;
   };
 
@@ -347,7 +370,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {RTCDataChannelEvent} e The data channel event.
    */
-  _handleDataChannel = (e) => {
+  _handleDataChannel = (e: RTCDataChannelEvent) => {
     this._setupDataChannel(e.channel);
   };
 
@@ -357,7 +380,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {RTCSessionDescriptionInit} sdp The session description.
    */
-  _handleSDP = async (sdp) => {
+  _handleSDP = async (sdp: RTCSessionDescriptionInit) => {
     if (!this.peerConnection) return;
 
     try {
@@ -392,12 +415,12 @@ export default class WsJsepProtocol {
    * @private
    * @param {RTCIceCandidateInit|string} candidate The ICE candidate object or string.
    */
-  _addIceCandidate = (candidate) => {
+  _addIceCandidate = (candidate: any) => {
     try {
       const candidateInit = typeof candidate === 'string'
         ? { candidate: candidate, sdpMid: "0", sdpMLineIndex: 0 }
         : candidate;
-      this.peerConnection.addIceCandidate(new RTCIceCandidate(candidateInit));
+      this.peerConnection?.addIceCandidate(new RTCIceCandidate(candidateInit));
     } catch (e) {
       logger.warn("Failed to add ICE candidate:", e, candidate);
     }
@@ -409,7 +432,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {RTCIceCandidateInit} candidate The remote ICE candidate.
    */
-  _handleCandidate = (candidate) => {
+  _handleCandidate = (candidate: any) => {
     if (!this.peerConnection) return;
     if (!this.remoteDescriptionSet) {
       logger.debug("Queueing ICE candidate until remote description is set:", candidate);
@@ -434,7 +457,7 @@ export default class WsJsepProtocol {
    * @private
    * @param {Object} jsonObject The JSON payload.
    */
-  _sendJsep = (jsonObject) => {
+  _sendJsep = (jsonObject: any) => {
     logger.debug("JSEP >> [Sending to Server]:", JSON.stringify(jsonObject, null, 2));
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(jsonObject));
@@ -448,7 +471,7 @@ export default class WsJsepProtocol {
    * @param {string} label The channel label ("mouse", "keyboard", "touch").
    * @param {Object} msg The protobuf message instance.
    */
-  send(label, msg) {
+  send(label: string, msg: any) {
     let bytes = msg.serializeBinary();
     let forwarder = this.event_forwarders[label];
     if (this.connected && forwarder && forwarder.readyState === "open") {
@@ -456,13 +479,13 @@ export default class WsJsepProtocol {
     } else if (this.emulator) {
       switch (label) {
         case "mouse":
-          this.emulator.sendMouse(msg);
+          if (this.emulator.sendMouse) this.emulator.sendMouse(msg);
           break;
         case "keyboard":
-          this.emulator.sendKey(msg);
+          if (this.emulator.sendKey) this.emulator.sendKey(msg);
           break;
         case "touch":
-          this.emulator.sendTouch(msg);
+          if (this.emulator.sendTouch) this.emulator.sendTouch(msg);
           break;
       }
     } else {
