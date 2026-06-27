@@ -70,9 +70,9 @@ export default class WsJsepProtocol {
   /**
    * Creates an instance of WsJsepProtocol.
    *
-   * @param {string} wsUrl The WebSocket JSEP signaling URL.
-   * @param {Object} [emulator=null] Fallback emulator controller for sending events when WebRTC is unavailable.
-   * @param {Object} [config={}] Configuration options.
+   * @param wsUrl The WebSocket JSEP signaling URL.
+   * @param emulator Fallback emulator controller for sending events when WebRTC is unavailable.
+   * @param config Configuration options.
    */
   constructor(wsUrl: string, emulator: EmulatorController | null = null, config: WsJsepConfig = {}) {
     this.wsUrl = wsUrl;
@@ -112,7 +112,7 @@ export default class WsJsepProtocol {
    * Establishes the WebSocket connection and starts the signaling process.
    * Cleans up any existing connection beforehand.
    *
-   * @param {Object} [callbacks] Callbacks for stream lifecycle events.
+   * @param callbacks Callbacks for stream lifecycle events.
    */
   startStream = (callbacks: StreamCallbacks = {}) => {
     this.cleanup();
@@ -177,7 +177,7 @@ export default class WsJsepProtocol {
    * and queues it for sequential processing.
    *
    * @private
-   * @param {MessageEvent} event The WebSocket message event.
+   * @param event The WebSocket message event.
    */
   _handleWsMessage = (event: MessageEvent) => {
     try {
@@ -211,7 +211,7 @@ export default class WsJsepProtocol {
    * Handles WebSocket connection close events.
    *
    * @private
-   * @param {CloseEvent} event The WebSocket close event.
+   * @param event The WebSocket close event.
    */
   _handleWsClose = (event: CloseEvent) => {
     logger.debug("WebSocket closed:", event);
@@ -226,7 +226,7 @@ export default class WsJsepProtocol {
    * Handles WebSocket error events.
    *
    * @private
-   * @param {Event} error The WebSocket error event.
+   * @param error The WebSocket error event.
    */
   _handleWsError = (error: Event) => {
     logger.error("WebSocket error:", error);
@@ -244,7 +244,7 @@ export default class WsJsepProtocol {
    * Processes a single JSEP signal (e.g., start, offer, answer, candidate, bye).
    *
    * @private
-   * @param {Object} signal The JSEP signaling message.
+   * @param signal The JSEP signaling message.
    */
   _handleSignal = async (signal: any) => {
     logger.debug("JSEP << [Received from Server]:", JSON.stringify(signal, null, 2));
@@ -275,7 +275,7 @@ export default class WsJsepProtocol {
    * Initializes the RTCPeerConnection and local data channels based on the start configuration.
    *
    * @private
-   * @param {Object} config The signaling start configuration.
+   * @param config The signaling start configuration.
    */
   _handleStart = async (config: RTCConfiguration) => {
     const localOnlyConfig: RTCConfiguration = {
@@ -319,7 +319,7 @@ export default class WsJsepProtocol {
    * Handles incoming media track events from the RTCPeerConnection.
    *
    * @private
-   * @param {RTCTrackEvent} e The track event.
+   * @param e The track event.
    */
   _handlePeerConnectionTrack = (e: RTCTrackEvent) => {
     if (this.onConnected) {
@@ -331,7 +331,7 @@ export default class WsJsepProtocol {
    * Handles ICE candidate generation from the local RTCPeerConnection.
    *
    * @private
-   * @param {RTCPeerConnectionIceEvent} e The ICE candidate event.
+   * @param e The ICE candidate event.
    */
   _handlePeerIceCandidate = (e: RTCPeerConnectionIceEvent) => {
     if (e.candidate === null) return;
@@ -342,7 +342,7 @@ export default class WsJsepProtocol {
    * Monitors connection state changes on the RTCPeerConnection to trigger disconnection.
    *
    * @private
-   * @param {Event} e The state change event.
+   * @param e The state change event.
    */
   _handlePeerConnectionStateChange = (e: Event) => {
     if (!this.peerConnection) return;
@@ -358,7 +358,7 @@ export default class WsJsepProtocol {
    * Registers a data channel for event forwarding.
    *
    * @private
-   * @param {RTCDataChannel} channel The data channel.
+   * @param channel The data channel.
    */
   _setupDataChannel = (channel: RTCDataChannel) => {
     this.event_forwarders[channel.label] = channel;
@@ -368,7 +368,7 @@ export default class WsJsepProtocol {
    * Handles remote data channel creation.
    *
    * @private
-   * @param {RTCDataChannelEvent} e The data channel event.
+   * @param e The data channel event.
    */
   _handleDataChannel = (e: RTCDataChannelEvent) => {
     this._setupDataChannel(e.channel);
@@ -378,7 +378,7 @@ export default class WsJsepProtocol {
    * Processes a remote SDP offer or answer, applying it to the RTCPeerConnection.
    *
    * @private
-   * @param {RTCSessionDescriptionInit} sdp The session description.
+   * @param sdp The session description.
    */
   _handleSDP = async (sdp: RTCSessionDescriptionInit) => {
     if (!this.peerConnection) return;
@@ -413,7 +413,7 @@ export default class WsJsepProtocol {
    * Adds a remote ICE candidate to the RTCPeerConnection.
    *
    * @private
-   * @param {RTCIceCandidateInit|string} candidate The ICE candidate object or string.
+   * @param candidate The ICE candidate object or string.
    */
   _addIceCandidate = (candidate: any) => {
     try {
@@ -430,7 +430,7 @@ export default class WsJsepProtocol {
    * Handles an incoming remote ICE candidate, queueing it if the remote description is not yet set.
    *
    * @private
-   * @param {RTCIceCandidateInit} candidate The remote ICE candidate.
+   * @param candidate The remote ICE candidate.
    */
   _handleCandidate = (candidate: any) => {
     if (!this.peerConnection) return;
@@ -455,7 +455,7 @@ export default class WsJsepProtocol {
    * Serializes and sends a JSEP JSON message over the WebSocket.
    *
    * @private
-   * @param {Object} jsonObject The JSON payload.
+   * @param jsonObject The JSON payload.
    */
   _sendJsep = (jsonObject: any) => {
     logger.debug("JSEP >> [Sending to Server]:", JSON.stringify(jsonObject, null, 2));
@@ -468,8 +468,8 @@ export default class WsJsepProtocol {
    * Sends a control message (mouse, keyboard, touch) over either the corresponding
    * WebRTC DataChannel or via the fallback emulator controller.
    *
-   * @param {string} label The channel label ("mouse", "keyboard", "touch").
-   * @param {Object} msg The protobuf message instance.
+   * @param label The channel label ("mouse", "keyboard", "touch").
+   * @param msg The protobuf message instance.
    */
   send(label: string, msg: any) {
     let bytes = msg.serializeBinary();
