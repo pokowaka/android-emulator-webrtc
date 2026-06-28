@@ -4,14 +4,25 @@ import { Emulator, logger } from '../../src';
 logger.setLevel("debug");
 
 function App() {
-  const [uri, setUri] = useState(window.location.host);
-  const [connected, setConnected] = useState(false);
+  // Retrieve default connection URI from URL query parameters (e.g. ?url=localhost:8080 or ?uri=localhost:8080)
+  const getInitialUri = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("url") || params.get("uri") || window.location.host;
+  };
+
+  const hasDefaultUri = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.has("url") || params.has("uri");
+  };
+
+  const [uri, setUri] = useState(getInitialUri());
+  const [connected, setConnected] = useState(hasDefaultUri());
   const [gps, setGps] = useState({ latitude: 37.4220, longitude: -122.0841 });
   const [inputGps, setInputGps] = useState({ lat: '37.4220', lng: '-122.0841' });
   const emulatorRef = useRef(null);
 
   const handleConnect = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setConnected(true);
   };
 
