@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import logger from "./logger";
+import Proto from "../../../proto/emulator_controller_pb";
 
 export interface WsJsepConfig {
   enableLogging?: boolean;
@@ -300,13 +301,9 @@ export default class WsJsepProtocol {
     this.peerConnection.addTransceiver("video", { direction: "recvonly" });
     this.peerConnection.addTransceiver("audio", { direction: "recvonly" });
 
-    const mouse = this.peerConnection.createDataChannel("mouse");
-    const keyboard = this.peerConnection.createDataChannel("keyboard");
-    const touch = this.peerConnection.createDataChannel("touch");
+    const input = this.peerConnection.createDataChannel("input");
 
-    this._setupDataChannel(mouse);
-    this._setupDataChannel(keyboard);
-    this._setupDataChannel(touch);
+    this._setupDataChannel(input);
 
     this.connected = true;
 
@@ -480,9 +477,24 @@ export default class WsJsepProtocol {
    * @param msg The protobuf message instance.
    */
   send = (label: string, msg: any) => {
-    let bytes = msg.serializeBinary();
-    let forwarder = this.event_forwarders[label];
+    let forwarder = this.event_forwarders["input"];
     if (this.connected && forwarder && forwarder.readyState === "open") {
+      const inputEvent = new Proto.InputEvent();
+      switch (label) {
+        case "mouse":
+          inputEvent.setMouseEvent(msg);
+          break;
+        case "keyboard":
+          inputEvent.setKeyEvent(msg);
+          break;
+        case "touch":
+          inputEvent.setTouchEvent(msg);
+          break;
+        default:
+          logger.warn(`Unsupported event label '${label}' for WebRTC data channel.`);
+          return;
+      }
+      let bytes = inputEvent.serializeBinary();
       forwarder.send(bytes);
     } else if (this.emulator) {
       switch (label) {
@@ -497,7 +509,7 @@ export default class WsJsepProtocol {
           break;
       }
     } else {
-      logger.warn(`Data channel '${label}' is not open. Event was dropped.`);
+      logger.warn(`Data channel 'input' is not open. Event was dropped.`);
     }
   };
 

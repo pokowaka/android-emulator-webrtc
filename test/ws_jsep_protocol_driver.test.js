@@ -18,6 +18,7 @@
  */
 import WsJsepProtocol from "../src/components/emulator/net/ws_jsep_protocol_driver";
 import logger from "../src/components/emulator/net/logger";
+import Proto from "../src/proto/emulator_controller_pb";
 
 describe("WsJsepProtocol Reconnection", () => {
   let mockWebSocketInstance;
@@ -164,12 +165,25 @@ describe("WsJsepProtocol Reconnection", () => {
         send: jest.fn(),
       };
       jsep.connected = true;
-      jsep.event_forwarders["mouse"] = mockChannel;
+      jsep.event_forwarders["input"] = mockChannel;
 
-      jsep.send("mouse", mockMsg);
+      // Mock Proto.InputEvent and its serialization
+      const mockInputEvent = {
+        setMouseEvent: jest.fn(),
+        serializeBinary: jest.fn().mockReturnValue(new Uint8Array([9, 9, 9])),
+      };
+      const originalInputEvent = Proto.InputEvent;
+      Proto.InputEvent = jest.fn().mockImplementation(() => mockInputEvent);
 
-      expect(mockChannel.send).toHaveBeenCalledWith(new Uint8Array([1, 2, 3]));
-      expect(mockEmulator.sendMouse).not.toHaveBeenCalled();
+      try {
+        jsep.send("mouse", mockMsg);
+
+        expect(mockInputEvent.setMouseEvent).toHaveBeenCalledWith(mockMsg);
+        expect(mockChannel.send).toHaveBeenCalledWith(new Uint8Array([9, 9, 9]));
+        expect(mockEmulator.sendMouse).not.toHaveBeenCalled();
+      } finally {
+        Proto.InputEvent = originalInputEvent;
+      }
     });
 
     test("Falls back to emulator controller when WebRTC is not connected", () => {

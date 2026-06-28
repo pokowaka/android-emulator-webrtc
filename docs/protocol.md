@@ -1,8 +1,11 @@
 # Android Emulator WebRTC Server Protocol Specification
 
-This document specifies the protocol required to implement an Emulator Gateway server that interfaces with the `android-emulator-webrtc` React frontend.
+This document specifies the protocol required to implement an Emulator Gateway
+server that interfaces with the `android-emulator-webrtc` React frontend.
 
-The gateway server acts as a bridge between the browser and the running emulator, translating HTTP REST and WebSocket signaling into the emulator's native gRPC interface.
+The gateway server acts as a bridge between the browser and the running
+emulator, translating HTTP REST and WebSocket signaling into the emulator's
+native gRPC interface.
 
 ```
 +---------+               +------------------+               +------------------+
@@ -19,9 +22,11 @@ The gateway server acts as a bridge between the browser and the running emulator
 
 ## 1. Control API (HTTP REST)
 
-The gateway must expose the following REST endpoints to handle control actions. The payload format is JSON.
+The gateway must expose the following REST endpoints to handle control actions.
+The payload format is JSON.
 
 ### 1.1. Get Emulator Status
+
 Retrieve the hardware configuration and runtime status of the emulator.
 
 - **Endpoint**: `GET /api/v1/emulator/status`
@@ -44,20 +49,22 @@ Retrieve the hardware configuration and runtime status of the emulator.
     }
   }
   ```
-  *Note: The frontend specifically expects `hardwareConfig["hw.lcd.width"]` and `hardwareConfig["hw.lcd.height"]` to scale mouse/touch coordinates.*
+  _Note: The frontend specifically expects `hardwareConfig["hw.lcd.width"]` and
+  `hardwareConfig["hw.lcd.height"]` to scale mouse/touch coordinates._
 
 ### 1.2. Set GPS Geolocation
+
 Update the emulator's mock location.
 
 - **Endpoint**: `POST /api/v1/emulator/gps`
 - **Request Body (JSON)**:
   ```json
   {
-    "latitude": 37.4220,          // Latitude coordinate
-    "longitude": -122.0841,        // Longitude coordinate
-    "altitude": 0.0,              // Optional, in meters
-    "heading": 0.0,               // Optional, bearing in degrees [0, 360]
-    "speed": 0.0                  // Optional, in meters per second
+    "latitude": 37.422, // Latitude coordinate
+    "longitude": -122.0841, // Longitude coordinate
+    "altitude": 0.0, // Optional, in meters
+    "heading": 0.0, // Optional, bearing in degrees [0, 360]
+    "speed": 0.0 // Optional, in meters per second
   }
   ```
 - **Response Code**: `200 OK`
@@ -65,24 +72,6 @@ Update the emulator's mock location.
   ```json
   {
     "status": "success"
-  }
-  ```
-
-### 1.3. Get Logcat Logs
-Retrieve a chunk of logcat logs from the emulator (typically used for polling).
-
-- **Endpoint**: `GET /api/v1/emulator/logcat`
-- **Query Parameters**:
-  - `start`: The offset to start reading from (optional, defaults to 0).
-- **Headers**:
-  - `Accept: application/json`
-  - `Authorization: <token>` (optional)
-- **Response Code**: `200 OK`
-- **Response Body (JSON)**:
-  ```json
-  {
-    "next": 1024,                 // Offset to use for the next request
-    "contents": "line 1\nline 2\n..." // Log contents
   }
   ```
 
@@ -94,31 +83,38 @@ WebRTC JSEP signaling is handled over a WebSocket connection.
 
 - **Endpoint**: `ws://<host>/api/v1/emulator/ws-jsep` (or `wss://`)
 - **Flow**:
-  1.  **Connection**: Client connects to the WebSocket.
-  2.  **Start Signal (Server -> Client)**: Server immediately sends the ICE Servers configuration.
-  3.  **SDP Offer (Server -> Client)**: Server sends the WebRTC SDP Offer.
-  4.  **SDP Answer (Client -> Server)**: Client responds with the WebRTC SDP Answer.
-  5.  **Trickle ICE (Bidirectional)**: Server and Client exchange ICE candidates as they are gathered.
-  6.  **Teardown**: Either side sends `bye` before closing.
+  1. **Connection**: Client connects to the WebSocket.
+  2. **Start Signal (Server -> Client)**: Server immediately sends the ICE
+     Servers configuration.
+  3. **SDP Offer (Server -> Client)**: Server sends the WebRTC SDP Offer.
+  4. **SDP Answer (Client -> Server)**: Client responds with the WebRTC SDP
+     Answer.
+  5. **Trickle ICE (Bidirectional)**: Server and Client exchange ICE candidates
+     as they are gathered.
+  6. **Teardown**: Either side sends `bye` before closing.
 
 ### 2.1. WebSocket Message Formats
 
-All WebSocket messages are JSON objects containing a single root key indicating the message type.
+All WebSocket messages are JSON objects containing a single root key indicating
+the message type.
 
 #### 2.1.1. Start Signal (Server -> Client)
-Instructs the client to initialize its `RTCPeerConnection` with the provided ICE configurations.
+
+Instructs the client to initialize its `RTCPeerConnection` with the provided ICE
+configurations.
+
 ```json
 {
   "start": {
-    "iceServers": [
-      { "urls": "stun:stun.l.google.com:19302" }
-    ]
+    "iceServers": [{ "urls": "stun:stun.l.google.com:19302" }]
   }
 }
 ```
 
 #### 2.1.2. SDP Offer (Server -> Client)
+
 The WebRTC offer containing media and data channel descriptions.
+
 ```json
 {
   "sdp": {
@@ -129,7 +125,9 @@ The WebRTC offer containing media and data channel descriptions.
 ```
 
 #### 2.1.3. SDP Answer (Client -> Server)
+
 The WebRTC answer generated by the client.
+
 ```json
 {
   "sdp": {
@@ -140,7 +138,9 @@ The WebRTC answer generated by the client.
 ```
 
 #### 2.1.4. ICE Candidate (Bidirectional)
+
 Exchange of ICE candidates.
+
 ```json
 {
   "candidate": {
@@ -152,7 +152,9 @@ Exchange of ICE candidates.
 ```
 
 #### 2.1.5. Bye (Bidirectional)
+
 Clean cleanup request.
+
 ```json
 {
   "bye": true
@@ -163,23 +165,17 @@ Clean cleanup request.
 
 ## 3. WebRTC Data Channels (Input Events)
 
-To support user interaction, the WebRTC Peer Connection must establish three **data channels** from the server side (pre-configured in the SDP Offer) or allowed to be created by the client. The frontend JSEP driver expects to find or receive these channels.
-
-The data channels are labeled as follows:
+To support user interaction, the WebRTC Peer Connection must establish a single **data channel** labeled `"input"` (pre-configured in the SDP Offer) or allowed to be created by the client. The frontend JSEP driver expects to find or receive this channel.
 
 | Channel Label | Message Type (Binary Protobuf) | Description |
 | :--- | :--- | :--- |
-| `mouse` | `emulator_controller.MouseEvent` | Mouse moves, clicks, and scrolls |
-| `keyboard`| `emulator_controller.KeyboardEvent`| Physical keyboard key presses |
-| `touch` | `emulator_controller.TouchEvent` | Multi-touch screen interactions |
+| `input` | `emulator_controller.InputEvent` | Unified channel for all user inputs (mouse, keyboard, touch, wheels) |
 
 ### 3.1. Message Routing
 
-1.  The client serializes input events into binary protobuf format using the compiled definitions in `proto/emulator_controller.proto`.
-2.  The client sends these binary bytes over the corresponding data channel.
-3.  The gateway server **must receive these binary messages** from the WebRTC data channels and forward them directly to the emulator's corresponding gRPC streaming or unary methods:
-    *   `mouse` channel bytes -> `EmulatorController.sendMouse` gRPC call.
-    *   `keyboard` channel bytes -> `EmulatorController.sendKey` gRPC call.
-    *   `touch` channel bytes -> `EmulatorController.sendTouch` gRPC call.
+1. The client serializes input events into binary protobuf format using the `emulator_controller.InputEvent` wrapper defined in `proto/emulator_controller.proto`.
+2. The client sends these binary bytes over the `"input"` data channel.
+3. The gateway server/video bridge **must receive these binary messages** from the WebRTC data channel and forward them directly to the emulator's corresponding gRPC streaming method:
+   - `input` channel bytes -> `EmulatorController.streamInputEvent` gRPC call.
 
 Since the data format in the WebRTC data channel is identical to the gRPC protobuf payload, the gateway can forward the raw binary bytes directly to the emulator's gRPC endpoints without decoding them, improving performance.
