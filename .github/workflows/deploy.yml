@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - webrtc-v2 # Trigger on push to the active branch (adjust if deploying from main/master)
+  workflow_dispatch:
 
 permissions:
   contents: read
