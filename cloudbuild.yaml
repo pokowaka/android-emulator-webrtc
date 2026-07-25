@@ -13,7 +13,7 @@ steps:
         path: /root/
   - name: "gcr.io/cloud-builders/npm"
     args: ["install"]
-  - name: "ubuntu"
+  - name: "node:22"
     entrypoint: "bash"
     args:
       - "-c"
