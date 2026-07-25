@@ -13,8 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Emulator from "./components/emulator/emulator";
-import Logcat from "./components/emulator/net/logcat";
-import EmulatorStatus from "./components/emulator/net/emulator_status";
+/**
+ * @fileoverview Main entry point for the android-emulator-webrtc package.
+ * Exports the primary Emulator React component and the EmulatorStatus utility.
+ */
 
-export { Emulator, Logcat, EmulatorStatus };
+import Emulator from "./components/emulator/emulator";
+import EmulatorStatus from "./components/emulator/net/emulator_status";
+import logger from "./components/emulator/net/logger";
+
+export { Emulator, EmulatorStatus, logger };

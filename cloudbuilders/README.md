@@ -1,8 +1,8 @@
-# protoc with grpc-web
+# protoc
 
 This tool defines a custom build step that allows the Cloud Build worker to run the
 [protocol buffer compiler](https://github.com/protocolbuffers/protobuf), `protoc`.
-with the protoc-gen-grpc-web plugin. You will need this builder to successfully compile
+You will need this builder to successfully compile
 the distribution in the cloud.
 
 ## Building this builder

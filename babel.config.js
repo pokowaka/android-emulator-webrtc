@@ -1,16 +1,19 @@
-"use strict";
-
-module.exports = {
-  presets: [
-    [
-      "@babel/preset-env",
-      {
-        targets: {
-          node: "current",
+module.exports = (api) => {
+  const isTest = api.env("test");
+  return {
+    presets: [
+      [
+        "@babel/preset-env",
+        {
+          targets: isTest ? { node: "current" } : undefined,
         },
-      },
+      ],
+      "@babel/preset-react",
+      "@babel/preset-typescript",
     ],
-    "@babel/preset-react",
-  ],
-  plugins: [["@babel/transform-runtime"]],
+    plugins: [
+      "@babel/plugin-proposal-class-properties",
+      ["@babel/transform-runtime"],
+    ],
+  };
 };

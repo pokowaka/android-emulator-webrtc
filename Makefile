@@ -15,109 +15,61 @@
 PROTOC = protoc
 PROTOC_CMD = which $(PROTOC)
 PYTHON = python
-
-# Check that the minimum protocol version >3.6
-PROTOHEADER = $(shell pkg-config --variable prefix protobuf)/include
-PROTOLIB = $(shell pkg-config --variable prefix protobuf)/lib
+NPM ?= npm
 
 HAS_PROTOC = $(shell $(PROTOC_CMD) > /dev/null && echo true || echo false)
-HAS_DEP = $(shell which $(DEP) > /dev/null && echo true || echo false)
 
-# Prefixing works differently on mac vs linux, so let us account for that.
-
-UNAME_S := $(shell uname -s)
 PREFIX_ESLINT = $(PYTHON) eslint_prefix.py
-
-ifeq ($(HAS_PROTOC),true)
-	ifneq (,$(wildcard $(PROTOHEADER)/google/protobuf/compiler/code_generator.h))
-		HAS_VALID_PROTOC := true
-	else
-		HAS_VALID_PROTOC := false
-	endif
-endif
-
-SYSTEM_OK = false
-ifeq ($(HAS_VALID_PROTOC),true)
-  	SYSTEM_OK = true
-endif
 
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR :=  $(abspath $(MAKEFILE_PATH)/..)
-# Protobuf settings. If you are running this in the AOSP tree you will want to run ninja install first.
 PROTODIR 	  := $(CURRENT_DIR)/src/proto/
 PROTOSRCDIR   := $(CURRENT_DIR)/proto
-PROTO_SRC     := $(wildcard $(PROTOSRCDIR)/*.proto)
-PROTO_OBJS    := $(addprefix $(PROTODIR)/, $(notdir $(PROTO_SRC:.proto=_pb.js)))
-PROXY_OBJS    := $(addprefix $(PROTODIR)/, $(notdir $(PROTO_SRC:.proto=_grpc_web_pb.js)))
 
+# We only need emulator_controller.proto to generate message definitions for data channel.
+PROTO_SRC     := $(PROTOSRCDIR)/emulator_controller.proto
+PROTO_OBJS    := $(PROTODIR)/emulator_controller_pb.js
 
-CXX = g++
-CPPFLAGS += -I$(PROTOHEADER) -pthread
-CXXFLAGS += -std=c++11
-LDFLAGS += -L$(PROTOLIB) -lprotoc -lprotobuf -lpthread -ldl
-
-.PHONY: build-release run-release develop stop
+.PHONY: clean build deps system-check protoc
 
 all: check
 
 clean:
 	rm -rf $(PROTODIR)/*pb.js
+	rm -rf dist
 
 $(PROTODIR):
 	@mkdir -p $(PROTODIR)
 
-# Protobuf --> js (note technically this produces 2 files.) which is not
-# the way you are supposed to do things in gnumake
-# https://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html
-# Use sed to insert the /* eslint-disable */ at the start of the file
-# \`$$`\n` forces a real newline char, because make.
-$(PROTODIR)/%_pb.js  : $(PROTOSRCDIR)/%.proto $(PROTODIR) protoc-gen-grpc-web
-	$(PROTOC) \
+# Compile proto to JS.
+# Note: we use protoc-gen-js which is installed via npm.
+# We make sure node_modules/.bin is in PATH.
+$(PROTODIR)/%_pb.js : $(PROTOSRCDIR)/%.proto $(PROTODIR)
+	PATH=$(CURRENT_DIR)/node_modules/.bin:$$PATH $(PROTOC) \
 	        -I/usr/local/include -I$(PROTODIR) -I$(PROTOSRCDIR) \
-			--plugin=protoc-gen-grpc-web=$(CURRENT_DIR)/protoc-gen-grpc-web \
 			--js_out=import_style=commonjs,binary:$(PROTODIR) \
-			--grpc-web_out=import_style=commonjs,mode=grpcwebtext:$(PROTODIR) \
 			$<
 	$(PREFIX_ESLINT) $@
 
-# Fix up the proxies _grpc_web files by prefixing  /* eslint-disable */
-# Not evey source produces a _grpc_web, so we onle do the replace if them file exists, otherwise it is a nop.
-$(PROTODIR)/%_grpc_web_pb.js : $(PROTODIR)/%_pb.js
-	@test -f $@  && $(PREFIX_ESLINT) $@ || true
+# We need node_modules to run protoc-gen-js (if it is installed via npm)
+deps: system-check
+	@$(NPM) install
 
-protoc: $(PROTO_OBJS) $(PROXY_OBJS)
+protoc: deps $(PROTO_OBJS)
 
-protoc-gen-grpc-web: protoc-plugin/grpc_generator.o
-	$(CXX) $^ $(LDFLAGS) -o $@
-
-deps: system-check protoc
-	@npm install
-
-build: deps
-	@npm run build
+build: deps protoc
+	@$(NPM) run build
 
 check: build
-	@npm run test
+	@$(NPM) run test
 
 system-check:
-ifneq ($(HAS_VALID_PROTOC),true)
+ifneq ($(HAS_PROTOC),true)
 	@echo " DEPENDENCY ERROR"
 	@echo
-	@echo "You don't have protoc 3.6.0 > installed in your path."
-	@echo "Please install Google protocol buffers 3.6.0> and its compiler."
-	@echo "You can find it here:"
-	@echo
-	@echo "   https://github.com/google/protobuf/releases/tag/v3.6.0"
+	@echo "You don't have protoc installed in your path."
+	@echo "Please install Google protocol buffers compiler."
 	@echo "   or try $ brew install protobuf"
-	@echo "   or sudo apt-get install libprotoc-dev protobuf-compiler"
+	@echo "   or sudo apt-get install protobuf-compiler"
 	@echo
-	@echo "Here is what I get when trying to evaluate your version of protoc:"
-	@echo
-	-$(PROTOC) --version
-	@echo
-	@echo "And here is where I am looking for the headers: $(PROTOHEADER)/google/protobuf"
-	@echo
-endif
-ifneq ($(SYSTEM_OK),true)
-	@false
 endif
