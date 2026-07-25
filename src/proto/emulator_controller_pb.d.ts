@@ -45,11 +45,19 @@ export class TouchEvent {
   serializeBinary(): Uint8Array;
 }
 
+export class InputEvent {
+  setMouseEvent(event: MouseEvent): void;
+  setKeyEvent(event: KeyboardEvent): void;
+  setTouchEvent(event: TouchEvent): void;
+  serializeBinary(): Uint8Array;
+}
+
 declare const Proto: {
   MouseEvent: typeof MouseEvent;
   KeyboardEvent: typeof KeyboardEvent;
   Touch: typeof Touch;
   TouchEvent: typeof TouchEvent;
+  InputEvent: typeof InputEvent;
 };
 
 export default Proto;

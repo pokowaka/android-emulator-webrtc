@@ -1,0 +1,39 @@
+name: Local Gemma 4
+version: 0.0.1
+schema: v1
+
+models:
+    - title: "Local Gemma (26B MoE)"
+      provider: "openai"
+      model: "gemma"
+      roles:
+       - chat
+       - edit
+       - apply
+      apiBase: "http://localhost:8000/v1"
+      apiKey: "none"
+
+tabAutocompleteModel:
+  title: "Local Gemma (26B MoE)"
+  provider: "openai"
+  model: "gemma"
+  apiBase: "http://localhost:8000/v1"
+  apiKey: "none"
+
+# models:
+#   - name: Gemma 2 E4B Chat
+#     provider: openai
+#     model: gemma4:e4b
+#     roles:
+#       - chat
+#       - edit
+#       - apply
+
+#   - name: Gemma 4 E2B Autocomplete
+#     provider: openai
+#     model: gemma4:e2b
+#     roles:
+#       - autocomplete
+#     autocompleteOptions:
+#       debounceDelay: 350
+#       maxPromptTokens: 1024
