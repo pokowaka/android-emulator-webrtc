@@ -495,7 +495,7 @@ export default class WsJsepProtocol {
           return;
       }
       let bytes = inputEvent.serializeBinary();
-      forwarder.send(bytes);
+      forwarder.send(bytes as any);
     } else if (this.emulator) {
       switch (label) {
         case "mouse":
