@@ -11,6 +11,8 @@ steps:
     volumes:
       - name: "home"
         path: /root/
+  - name: "gcr.io/cloud-builders/npm"
+    args: ["install"]
   - name: "ubuntu"
     entrypoint: "bash"
     args:
@@ -20,9 +22,8 @@ steps:
         wget -q "https://github.com/protocolbuffers/protobuf/releases/download/v23.1/protoc-23.1-linux-x86_64.zip"
         unzip -q protoc-23.1-linux-x86_64.zip -d /usr/local
         mkdir -p src/proto
+        export PATH=/workspace/node_modules/.bin:$$PATH
         protoc --proto_path="./proto" --js_out="import_style=commonjs:src/proto" "./proto/emulator_controller.proto"
-  - name: "gcr.io/cloud-builders/npm"
-    args: ["install"]
   - name: "gcr.io/cloud-builders/npm"
     args: ["run", "build"]
   - name: "gcr.io/cloud-builders/npm"
