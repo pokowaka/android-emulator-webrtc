@@ -10,18 +10,17 @@ ARCHIVE_NAME="emulator-webrtc-ui.tar.gz"
 CHECKSUM_FILE="SHA256SUMS"
 
 echo "=== Packaging Prebuilt Web UI for Release ==="
-echo "Repository root: ${REPO_ROOT}"
+VERSION=$(node -p "require('${REPO_ROOT}/package.json').version")
+echo "Repository root: ${REPO_ROOT} (version ${VERSION})"
 
 # Ensure root protobuf generator has run if proto files are needed
 if [ ! -f "${REPO_ROOT}/src/proto/emulator_controller_pb.js" ]; then
   echo "Generating proto bindings in repository root..."
   cd "${REPO_ROOT}"
-  if [ -f "package-lock.json" ]; then
-    npm ci
-  else
-    npm install
+  if [ -f "node_modules/protoc-gen-js/post-install.js" ] && [ ! -f "node_modules/protoc-gen-js/bin/protoc-gen-js" ]; then
+    node node_modules/protoc-gen-js/post-install.js || true
   fi
-  npm run build
+  make protoc
 fi
 
 # Build example frontend
