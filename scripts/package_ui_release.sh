@@ -16,12 +16,10 @@ echo "Repository root: ${REPO_ROOT}"
 if [ ! -f "${REPO_ROOT}/src/proto/emulator_controller_pb.js" ]; then
   echo "Generating proto bindings in repository root..."
   cd "${REPO_ROOT}"
-  if [ -f "package-lock.json" ]; then
-    npm ci
-  else
-    npm install
+  if [ -f "node_modules/protoc-gen-js/post-install.js" ] && [ ! -f "node_modules/protoc-gen-js/bin/protoc-gen-js" ]; then
+    node node_modules/protoc-gen-js/post-install.js || true
   fi
-  npm run build
+  make protoc
 fi
 
 # Build example frontend
