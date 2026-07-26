@@ -10,7 +10,8 @@ ARCHIVE_NAME="emulator-webrtc-ui.tar.gz"
 CHECKSUM_FILE="SHA256SUMS"
 
 echo "=== Packaging Prebuilt Web UI for Release ==="
-echo "Repository root: ${REPO_ROOT}"
+VERSION=$(node -p "require('${REPO_ROOT}/package.json').version")
+echo "Repository root: ${REPO_ROOT} (version ${VERSION})"
 
 # Ensure root protobuf generator has run if proto files are needed
 if [ ! -f "${REPO_ROOT}/src/proto/emulator_controller_pb.js" ]; then
