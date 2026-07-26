@@ -37,7 +37,7 @@ jobs:
         run: npm test
 
       - name: Publish to npm
-        run: npm publish --provenance --loglevel verbose
+        run: npm publish --provenance --access public --loglevel verbose
 
       - name: Print npm log on failure
         if: failure()
