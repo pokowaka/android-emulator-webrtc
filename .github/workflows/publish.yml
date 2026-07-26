@@ -37,4 +37,8 @@ jobs:
         run: npm test
 
       - name: Publish to npm
-        run: npm publish
+        run: npm publish --provenance --loglevel verbose
+
+      - name: Print npm log on failure
+        if: failure()
+        run: cat /home/runner/.npm/_logs/*-debug-*.log
